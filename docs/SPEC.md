@@ -4,14 +4,7 @@ What compile-outcomes does, accepts and refuses. [ARCHITECTURE.md](ARCHITECTURE.
 
 ## 0. What ships in 0.1.0
 
-Everything this document describes outside this section ships in 0.1.0. These are not part of 0.1.0, and are listed so that a later version can add them without breaking anything here:
-
-- snippets compiled as binaries or tests instead of libraries;
-- dependencies given by git URL, and dependencies that only some snippets get;
-- choosing the target triple, the profile or extra `rustc` flags;
-- a time limit on a compilation;
-- diagnostics with their paths rewritten alike on every platform, such as the snippet folders written as a placeholder, which a later version may add as an option, leaving them as the compiler gave them by default;
-- a `Display` for `Outcome`, its diagnostics as the compiler rendered them with paths made alike, for failure messages and for comparing with a saved file.
+Everything this document describes outside this section ships in 0.1.0. What a later version may add, such as snippets compiled as binaries or a time limit, is planned in the repository's [open issues labelled `feature`](https://github.com/marlon-sousa/compile-outcomes-rs/issues?q=is%3Aissue%20is%3Aopen%20label%3Afeature), each saying what it must not break here. A feature is written into this document in the pull request that builds it.
 
 ## 1. Purpose
 
