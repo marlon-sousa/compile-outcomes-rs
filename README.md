@@ -73,6 +73,10 @@ compile-outcomes runs the `cargo` the `CARGO` environment variable names, which 
 
 compile-outcomes works the same on Linux, macOS and Windows, and its tests run on all three. It compares no text, so it rewrites none: a diagnostic's `location.file` is the path the compiler gave, with the platform's separators, and its `message` and `rendered` are the compiler's own words. A test that compares them with text it holds, the same on every platform, makes paths alike first, for example by replacing each `\` with `/`.
 
+### Compiler versions
+
+Compiler messages change from one Rust version to the next, and compile-outcomes reports them as they are. A diagnostic's `code`, such as `E0425`, and its `line` and `column` rarely change; its `message`, one line, sometimes does; and `rendered`, the whole block, changes most often. A suite that checks codes and locations, and messages only where they matter, survives most upgrades; one that compares `rendered` runs best on one pinned toolchain.
+
 ### What 0.1.0 does not do yet
 
 Snippets compiled as binaries or tests, dependencies by git URL or for only some snippets, choosing the target, the profile or extra `rustc` flags, and a time limit are not part of 0.1.0. [docs/SPEC.md](docs/SPEC.md) describes exactly what it does.
