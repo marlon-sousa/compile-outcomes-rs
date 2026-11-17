@@ -61,7 +61,7 @@ Layering goes one way. The facade calls the service with the adapters; the servi
 5. **Unit tests live with the code**, in `module/tests.rs`, declared with `#[cfg(test)] mod tests;` at the bottom of `module.rs`, in the module whose code decides what they check. Tests in `tests/` reach the crate only through its public API, as a user does.
 6. **A file holds one thing, and its length is a signal.** A file holding two things or more, at any length, keeps one and moves each other to a private submodule. Past 200 lines `cargo xtask ci` fails, and the file splits along its seams. Each file is counted on its own, and a module's tests, in their own `tests.rs`, are counted apart from it.
 7. **Import a symbol, then use it by its bare name**, except a crate's types used once where the crate's name says what they are, such as `cargo_metadata::Message` in an adapter.
-8. **Helpers that the tests of several modules share** live in a test-only module, `test_support.rs` at the crate's root, never copied from one test module to another.
+8. **Helpers that the tests of several modules share** live in a test-only module, `test_support.rs` at the crate's root, never copied from one test module to another. Its role line says **Test support**.
 
 ## Writing the code
 
@@ -84,7 +84,7 @@ Layering goes one way. The facade calls the service with the adapters; the servi
 ## The public API
 
 - **Its names are a promise.** `compile`, `Compilation` and its methods, `Dependency`, `Edition`, `Outcomes`, `Outcome`, `Diagnostic`, `Location`, `SnippetName`, `Errors` and `Error` are what users write; changing how any of them is named or typed is agreed with the maintainer first.
-- **Room to grow.** `Diagnostic`, `Location` and `Error` are `#[non_exhaustive]`, so a later version can add a field or an error without breaking a user's code.
+- **Room to grow.** `Diagnostic`, `Location`, `Edition` and `Error` are `#[non_exhaustive]`, and so is each variant of `Error` with fields, so a later version can add a field, an edition or an error without breaking a user's code.
 
 ## Comments
 

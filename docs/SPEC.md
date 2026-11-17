@@ -52,8 +52,8 @@ Describing a compilation touches nothing on disk; only compiling it does.
 
 ## 5. Outcomes
 
-1. **`Outcomes` holds one `Outcome` for every snippet**, looked up with `.get(name)`, where `name` is the snippet's name as a `&str`, and iterated as pairs of a `SnippetName` and its `Outcome`, in the order of the names.
-2. **An `Outcome` is `Compiled { warnings }` or `Failed { errors, warnings }`.** A snippet compiled when Cargo produced its crate; it failed when the compiler reported errors for it.
+1. **`Outcomes` holds one `Outcome` for every snippet**, looked up with `.get(name)`, where `name` is the snippet's name as a `&str`, and iterated, with `.iter()` or a `for` loop over `&outcomes`, as pairs of a `SnippetName` and its `Outcome`, in the order of the names. A `SnippetName` gives the name with `.as_str()`, and displays as it.
+2. **An `Outcome` is `Compiled { warnings }` or `Failed { errors, warnings }`.** A snippet compiled when Cargo produced its crate; it failed when the compiler reported errors for it. `.is_compiled()` and `.is_failed()` tell which, and `.errors()` and `.warnings()` give them whatever the outcome, no errors for a snippet that compiled.
 3. **A `Diagnostic` is one message of the compiler**, with:
    - `message`, its first line, such as ``cannot find function `shout` in crate `greeting` ``;
    - `code`, the error code or the lint it comes from, such as `E0425` or `dead_code`, when it has one;
@@ -64,16 +64,16 @@ Describing a compilation touches nothing on disk; only compiling it does.
 
 ## 6. Errors
 
-`Errors` holds every problem that kept a compilation from its outcomes, and is never empty. Each `Error` is a sentence that names what it is about.
+`Errors` holds every problem that kept a compilation from its outcomes, in the order they were found, and is never empty: `.first()` gives the first, and `.iter()`, or a `for` loop over it, every one. Each `Error` is a sentence that names what it is about, and `Errors` reads as those sentences, each starting on a line of its own.
 
 1. **Problems with the description are reported together**, before anything is written:
    - a compilation with no snippet;
    - a snippet whose name breaks §3, rule 2, naming its file;
    - two snippets with the same name, or names that differ only by `-` and `_`, naming both files;
-   - a snippet file, or a folder given to `.snippets_in`, that cannot be read, with the reason the system gave.
+   - a snippet file, or a folder given to `.snippets_in`, that cannot be read, naming which, with the reason the system gave.
 2. **Problems while compiling stop it**, and are reported alone:
    - the project or the lockfile cannot be written, with the reason the system gave;
-   - Cargo cannot be started, with the reason the system gave;
+   - Cargo cannot be started, naming the program run, with the reason the system gave;
    - Cargo stops without building any snippet and without a compiler message, such as when a dependency cannot be found or resolved, with what it wrote to its error output;
    - a dependency fails to compile, naming it, with its errors;
    - Cargo finishes without an outcome for a snippet, naming it.

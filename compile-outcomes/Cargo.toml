@@ -13,3 +13,8 @@ categories = ["development-tools::testing"]
 
 [lints]
 workspace = true
+
+[dependencies]
+derive_more.workspace = true
+strum.workspace = true
+thiserror.workspace = true
