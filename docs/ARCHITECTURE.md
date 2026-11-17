@@ -14,10 +14,11 @@ compile-outcomes does input and output, so it has ports: a port is a trait the s
 
 - **`compile-outcomes/`**, the crate users depend on, laid out as the rest of this document describes. Its `tests/` folder holds the Gherkin scenarios: the features, `tests/features/`; their steps, the test target `tests/scenarios/`; and what they compile, `tests/fixtures/`, snippets and two small crates, `greeting` and `broken`, which the workspace excludes.
 - **`xtask/`**, the quality gate, `cargo xtask ci`, whose checks CI runs, the tests on Linux, macOS and Windows; [WORKFLOW.md](WORKFLOW.md), section 7, lists them.
-- **`.github/workflows/`**, the CI, pull request and weekly workflows, as [WORKFLOW.md](WORKFLOW.md), section 7, lists them.
+- **`.github/workflows/`**, the CI, pull request, release and weekly workflows, as [WORKFLOW.md](WORKFLOW.md), section 7, lists them, and **`.github/release/`**, the scripts of the release workflow and their fixtures.
+- **`cliff.toml`**, how git-cliff drafts a release's section of **`CHANGELOG.md`**, as [WORKFLOW.md](WORKFLOW.md), section 9, says.
 - **`clippy.toml`**, what clippy allows in tests.
 - **`deny.toml`**, what cargo-deny allows of the dependencies.
-- **`docs/`**: [SPEC.md](SPEC.md), what compile-outcomes does; this document; [WORKFLOW.md](WORKFLOW.md), the stacked pull requests and the definition of done.
+- **`docs/`**: [SPEC.md](SPEC.md), what compile-outcomes does; this document; [WORKFLOW.md](WORKFLOW.md), the stacked pull requests, the definition of done and how a version is released.
 - **`.claude/skills/`**, the procedures an agent follows, such as having a change reviewed. They add no rule of their own: each points at the rules it follows.
 
 ## How a compilation runs

@@ -48,7 +48,7 @@ A pull request is ready to merge when:
 
 - [ ] `cargo xtask ci` passes locally.
 - [ ] Every behaviour has its scenario, and every fixed bug its regression test, as AGENTS.md, "Rules", asks.
-- [ ] Every check of the CI and pull request workflows passes, including the tests on Linux, macOS and Windows and on the minimum supported Rust.
+- [ ] Every check of the CI and pull request workflows passes, and of the release workflow when the change alters how releases are made, including the tests on Linux, macOS and Windows and on the minimum supported Rust.
 - [ ] The description has no unticked checkbox.
 - [ ] The reviewer agent's verdict on the latest push is approve.
 
@@ -76,8 +76,42 @@ Every action a workflow uses is pinned to a commit, with its version in a commen
 
 - **`.github/workflows/ci.yml`**, on every pull request and every push to `main` or a `stack/*` branch: each mode of `cargo xtask ci` in a job of its own on Linux, the `test` mode on Linux, macOS and Windows, and the `test` mode again with the minimum supported Rust.
 - **`.github/workflows/pull-request.yml`**, on every pull request, whatever its base: every commit message keeps the convention of section 3, and the description has no unticked checkbox. Ticking a checkbox runs only this workflow again.
+- **`.github/workflows/release.yml`**, on a tag `v<version>`, and on a pull request that changes how releases are made: section 9 describes it.
 - **`.github/workflows/weekly.yml`**, each Monday: the `test` mode on Rust beta, so that a change in the next Rust that breaks compile-outcomes, such as a change to the messages Cargo writes, is known before it is released.
 
 ## 8. Versions
 
 compile-outcomes follows [Semantic Versioning](https://semver.org/). Its public API, the names docs/ARCHITECTURE.md, "The public API", lists, is what is promised: a change that breaks code written against it is a major version, or a minor one before 1.0.
+
+## 9. Releases
+
+compile-outcomes has one version, `version` in the workspace's `Cargo.toml`.
+
+### Preparing a release
+
+A release starts as a pull request, titled "Release <version>", whose commit `chore(release): release <version>`:
+
+1. raises `version` under `[workspace.package]` in `Cargo.toml`, and the version in `Cargo.lock` with `cargo update --workspace`;
+2. writes the version's section at the top of [CHANGELOG.md](../CHANGELOG.md), starting from what `git cliff --unreleased --tag v<version> --strip all` prints, which is the heading `## [<version>]` and the entries of the commits since the last release;
+3. reconciles those entries, since a commit's entries cannot change once it merges: entries a later commit made untrue become one that says what the release holds, entries that say the same thing merge, and a change a user meets that carries no entry gets one.
+
+`cliff.toml` is written for git-cliff 2.14.2, which installs with `cargo install git-cliff --version 2.14.2 --locked`.
+
+A pre-release is named with a dot before its number, such as `0.1.0-alpha.1` or `0.2.0-rc.1`. Only a version without a pre-release part and a release candidate, `rc.N`, go to crates.io; an alpha, a beta or any other pre-release is released on GitHub only.
+
+### Tagging it
+
+Once the pull request has merged, the maintainer tags the commit the merge put on `main` and pushes the tag, such as `git tag -a v0.1.0 <commit> -m "compile-outcomes 0.1.0"` and `git push origin v0.1.0`. `.github/workflows/release.yml` then runs:
+
+1. **release gate**, which refuses the tag unless it is `v` and the version in `Cargo.toml`, its commit is on `main`, and `CHANGELOG.md` has notes for the version, reporting every reason, and tells whether the version goes to crates.io;
+2. **checks**, every job of `ci.yml` again on the tagged commit;
+3. **release tools**, the release gate and the crates.io rule against their fixtures under `.github/release/`;
+4. **the crate's package**, the `.crate` file of compile-outcomes;
+5. **crates.io**, for a version that goes there, once every job before it passed;
+6. **GitHub release**, with the `create-release` action of [itinera-dev/actions](https://github.com/itinera-dev/actions): the version's section of `CHANGELOG.md` as its notes, a pre-release for a version such as `0.2.0-rc.1`, and the package attached.
+
+A pull request that changes how releases are made runs the release tools and packs the crate, without releasing anything.
+
+### Publishing to crates.io
+
+crates.io's trusted publishing lets the workflow publish without a token, but it is set up on a crate that already exists there. So the first version, 0.1.0, is published by hand: once the checks on the tagged commit and the crates.io dry run have passed, the maintainer runs `cargo publish --package compile-outcomes --locked` at the tagged commit, from Linux or macOS. The crate's licence files are links to the ones at the root, which a Windows checkout without symbolic links would pack as text. Until trusted publishing is set up, the crates.io job only runs `cargo publish --workspace --dry-run --locked`. A later pull request then makes the job publish, in a `crates-io` environment, with the `publish-crates` action of itinera-dev/actions.

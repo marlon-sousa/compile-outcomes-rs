@@ -9,6 +9,8 @@ on:
       - "stack/**"
   pull_request:
     types: [opened, synchronize, reopened]
+  # The release workflow runs these checks again on the tagged commit.
+  workflow_call:
 
 permissions:
   contents: read
