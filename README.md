@@ -8,7 +8,7 @@ compile-outcomes is made for test suites that check what a library tells its use
 
 [trybuild](https://crates.io/crates/trybuild) is excellent, and it is the right choice when what you want is a snapshot: it compares what the compiler wrote for each test case with a saved `.stderr` file, and rewrites the paths and details that differ between machines so the files stay stable. Much of the Rust ecosystem tests its macros with it.
 
-compile-outcomes answers a different need. It hands your tests what the compiler said, as data: for each snippet, whether it compiled, and each error and warning with its message, its code and the line and column it points at. It judges nothing, so your test framework decides what matters, whether that is one error code, a few words of a message, or the whole text. And since it never compares whole texts, a test that checks codes and locations is less affected by compiler upgrades than one comparing whole texts.
+compile-outcomes answers a different need. It hands your tests what the compiler said, as data: for each snippet, whether it compiled, and each error and warning with its message, its code and the line and column it points at. It judges nothing, so your test framework decides what matters, whether that is one error code, a few words of a message, or the whole text. And a test that checks codes and locations is less affected by compiler upgrades than one comparing whole texts.
 
 ## Using it
 
