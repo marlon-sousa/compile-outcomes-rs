@@ -3,6 +3,7 @@
 mod given;
 mod then;
 
+use std::fs;
 use std::path::PathBuf;
 
 use compile_outcomes::{Compilation, Errors, Outcomes, compile};
@@ -18,6 +19,14 @@ pub(crate) struct Compiling {
 /// The folder every scenario compiles in, one after the other, so that the build of the dependencies is shared.
 fn work_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("scenarios")
+}
+
+/// Removes the project folder a run before the owner marker existed may have left, such as one a CI cache restores, keeping the build output.
+pub(crate) fn forget_earlier_projects() {
+    let project = work_dir().join("project");
+    if project.exists() {
+        fs::remove_dir_all(project).unwrap();
+    }
 }
 
 /// The work folder whose project folder holds a file compile-outcomes did not write.
