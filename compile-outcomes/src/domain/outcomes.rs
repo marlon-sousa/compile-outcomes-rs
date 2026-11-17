@@ -4,6 +4,7 @@ mod outcome;
 
 use std::collections::BTreeMap;
 
+use delegate::delegate;
 use derive_more::IntoIterator;
 
 use crate::domain::SnippetName;
@@ -20,7 +21,7 @@ impl Outcomes {
         Self(outcomes)
     }
 
-    delegate::delegate! {
+    delegate! {
         to self.0 {
             /// The outcome of the snippet named `name`, or `None` when the compilation had no such snippet.
             pub fn get(&self, name: &str) -> Option<&Outcome>;
