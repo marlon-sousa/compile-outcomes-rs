@@ -1,4 +1,5 @@
 use std::collections::BTreeSet;
+use std::ffi::OsString;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -6,7 +7,7 @@ use std::path::{Path, PathBuf};
 use tempfile::TempDir;
 
 use super::FileSystem;
-use crate::domain::{Edition, Error, OWNER_MARKER, Package, Project, ProjectFolder, Resolver};
+use crate::domain::{Edition, Error, OWNER_MARKER, Package, Project, Resolver};
 use crate::ports::Disk;
 
 fn project(root: &Path, lockfile: Option<PathBuf>) -> Project {
@@ -109,22 +110,23 @@ fn a_lockfile_that_cannot_be_copied_names_the_copy() {
 }
 
 #[test]
-fn a_project_folder_is_missing_empty_owned_or_foreign() {
+fn a_missing_folder_has_no_names() {
     let folder = TempDir::new().unwrap();
-    let root = folder.path().join("project");
-    let cases: [(&[&str], ProjectFolder); 3] = [
-        (&[], ProjectFolder::Empty),
-        (&["notes.txt"], ProjectFolder::Foreign),
-        (&["notes.txt", OWNER_MARKER], ProjectFolder::Owned),
-    ];
 
-    assert_eq!(FileSystem.project_folder(&root), Ok(ProjectFolder::Missing));
-    for (files, expected) in cases {
-        fs::create_dir_all(&root).unwrap();
-        for file in files {
-            fs::write(root.join(file), "").unwrap();
-        }
-        assert_eq!(FileSystem.project_folder(&root), Ok(expected), "{files:?}");
-        fs::remove_dir_all(&root).unwrap();
-    }
+    assert_eq!(
+        FileSystem.names_in(&folder.path().join("missing")),
+        Ok(None)
+    );
+}
+
+#[test]
+fn the_names_in_a_folder_are_those_of_its_files_and_folders() {
+    let folder = TempDir::new().unwrap();
+    fs::write(folder.path().join("notes.txt"), "").unwrap();
+    fs::create_dir(folder.path().join("drafts")).unwrap();
+
+    let names = FileSystem.names_in(folder.path());
+
+    let expected = BTreeSet::from([OsString::from("drafts"), OsString::from("notes.txt")]);
+    assert_eq!(names, Ok(Some(expected)));
 }

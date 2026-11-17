@@ -72,6 +72,7 @@ Feature: What keeps a compilation from its outcomes
       """
       The folder
       """
+    And the refusal names the project folder and the file ".owned-by-compile-outcomes"
     And the compilation is refused with 1 problem
     And the file of its own is still there
 

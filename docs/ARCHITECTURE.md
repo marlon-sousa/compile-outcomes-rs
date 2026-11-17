@@ -26,7 +26,7 @@ compile-outcomes does input and output, so it has ports: a port is a trait the s
 1. `lib.rs` re-exports the model and defines `compile`, which hands the compilation to the service with the real adapters.
 2. The service, `use_cases/compile.rs`, asks the disk port for the snippet files the compilation names, and the naming policy for the snippets they make. It gathers every problem with the description before going on.
 3. The project policy makes the `Project` that compiles those snippets: one package per snippet, with the compilation's edition and dependencies.
-4. The disk port says what is at the project's root, and the service refuses a folder holding files compile-outcomes did not write. Otherwise the disk port writes the project, and the Cargo port builds it and returns the `BuildReport`: every compiler message with the crate it is about, every crate built, and what Cargo wrote to its error output.
+4. The disk port lists the names at the project's root, the ownership policy says whose that folder is, and the service refuses a folder holding files compile-outcomes did not write. Otherwise the disk port writes the project, and the Cargo port builds it and returns the `BuildReport`: every compiler message with the crate it is about, every crate built, and what Cargo wrote to its error output.
 5. The outcomes policy turns the report into the `Outcomes`, or into the errors that kept the compilation from them.
 
 ## Module roles
@@ -35,7 +35,7 @@ Every module plays one role, and says which on the first line of its `//!` doc c
 
 1. **Entity**: data and the invariants it keeps, in `domain/`: the compilation, the snippets and their names, the project, the build report and the outcomes.
 2. **Error**: what keeps a compilation from its outcomes, in `domain/errors.rs`, as "Errors" below describes.
-3. **Policy**: a pure decision, in `use_cases/`: naming the snippets, making the project, and the outcomes.
+3. **Policy**: a pure decision, in `use_cases/`: naming the snippets, making the project, whose the project folder is, and the outcomes.
 4. **Service**: `use_cases/compile.rs`, which runs a compilation through the ports and the policies.
 5. **Port**: a trait the service needs the world to implement, in `ports.rs`: the disk and Cargo.
 6. **Adapter**: the code that does input and output, in `adapters/`: the disk adapter, which speaks `std::fs` and `toml`, and the Cargo adapter, which speaks `std::process` and `cargo_metadata`. Pure code that only one adapter uses to speak its library, such as turning a compiler message into a `Diagnostic`, is a private submodule of that adapter.
@@ -50,7 +50,7 @@ Layering goes one way. The facade calls the service with the adapters; the servi
 ## The typed model
 
 - **The domain does no input or output.** `domain/` and `use_cases/` name nothing of `std::fs`, `std::io`, `std::process`, `std::env`, `std::net`, `std::os`, `cargo_metadata` or `toml`, call no method that opens a path, such as `exists`, `metadata` or `read_dir`, whatever it is called on, and print nothing with `print!`, `println!`, `eprint!`, `eprintln!` or `dbg!`. `cargo xtask ci` checks all three, reading each file's syntax tree and the arguments of its macros, and refuses importing `std` whole, which would hide what it uses. Paths are data there, never opened.
-- **Adapters translate, they don't decide.** The Cargo adapter reports every message with the crate it is about and its level, and every crate built; which crate is a snippet, whether a snippet compiled and whether a dependency failed are the outcomes policy's. The disk adapter writes the project the project policy made, and lists the files of a folder; which files are snippets and what they are called is the naming policy's.
+- **Adapters translate, they don't decide.** The Cargo adapter reports every message with the crate it is about and its level, and every crate built; which crate is a snippet, whether a snippet compiled and whether a dependency failed are the outcomes policy's. The disk adapter writes the project the project policy made, and lists the files or names of a folder; which files are snippets and what they are called is the naming policy's, and whether the project folder is compile-outcomes' own is the ownership policy's.
 - **A snippet's name is checked once.** `SnippetName` can only be made from a valid name, so every later step holds a name that is known to be good, and the crate name the compiler reports maps back to its snippet without a lookup that could fail.
 
 ## Folders and files

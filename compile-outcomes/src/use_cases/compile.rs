@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crate::domain::{Compilation, Error, Errors, Found, Outcomes, Snippet, SnippetSource};
 use crate::ports::{Cargo, Disk};
-use crate::use_cases::{naming, outcomes, project};
+use crate::use_cases::{naming, outcomes, ownership, project};
 
 /// The outcome of every snippet of `compilation`, or every problem with its description, or the first problem while compiling it.
 pub(crate) fn compile(
@@ -23,7 +23,8 @@ pub(crate) fn compile(
         .and_then(|lockfile| unreadable_lockfile(lockfile, disk));
     let snippets = described(naming::snippets(found), lockfile)?;
     let project = project::project(compilation, &snippets);
-    if disk.project_folder(&project.root)?.is_foreign() {
+    let names = disk.names_in(&project.root)?;
+    if ownership::project_folder(names.as_ref()).is_foreign() {
         return Err(Error::ForeignProjectFolder {
             folder: project.root,
         }

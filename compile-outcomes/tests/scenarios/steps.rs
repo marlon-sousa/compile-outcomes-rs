@@ -21,8 +21,8 @@ fn work_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("scenarios")
 }
 
-/// Removes the project folder a run before the owner marker existed may have left, such as one a CI cache restores, keeping the build output.
-pub(crate) fn forget_earlier_projects() {
+/// Removes the project folder an earlier run left, keeping the build output.
+pub(crate) fn forget_earlier_project() {
     let project = work_dir().join("project");
     if project.exists() {
         fs::remove_dir_all(project).unwrap();

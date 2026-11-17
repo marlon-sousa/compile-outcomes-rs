@@ -6,7 +6,7 @@ use compile_outcomes::{Diagnostic, Errors, Location, Outcome, Outcomes};
 use cucumber::gherkin::Step;
 use cucumber::then;
 
-use super::{Compiling, file_of_its_own, fixture, work_dir};
+use super::{Compiling, file_of_its_own, fixture, foreign_work_dir, work_dir};
 
 impl Compiling {
     fn outcomes(&self) -> &Outcomes {
@@ -164,6 +164,14 @@ fn the_lockfile_version(_world: &mut Compiling, version: u8) {
 fn left_as_it_was(_world: &mut Compiling) {
     let text = fs::read_to_string(fixture("lockfile.lock")).unwrap();
     assert_eq!(text, include_str!("../../fixtures/lockfile.lock"));
+}
+
+#[then(expr = "the refusal names the project folder and the file {string}")]
+fn names_folder_and_file(world: &mut Compiling, file: String) {
+    let said = world.errors().to_string();
+    let folder = foreign_work_dir().join("project");
+    assert!(said.contains(&folder.display().to_string()), "{said}");
+    assert!(said.contains(&file), "{said}");
 }
 
 #[then("the file of its own is still there")]

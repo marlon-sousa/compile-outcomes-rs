@@ -2,9 +2,10 @@
 
 use std::cell::RefCell;
 use std::collections::BTreeSet;
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-use crate::domain::{BuildReport, Error, Project, ProjectFolder};
+use crate::domain::{BuildReport, Error, Project};
 use crate::ports::{Cargo, Disk};
 
 /// A disk whose files and folders are given, and which records each project it writes.
@@ -12,7 +13,7 @@ use crate::ports::{Cargo, Disk};
 pub(super) struct FakeDisk {
     pub(super) unreadable: Vec<PathBuf>,
     pub(super) folder: BTreeSet<PathBuf>,
-    pub(super) foreign: bool,
+    pub(super) project_folder: Option<BTreeSet<OsString>>,
     pub(super) refuses_writing: bool,
     pub(super) written: RefCell<Vec<Project>>,
 }
@@ -30,12 +31,8 @@ impl Disk for FakeDisk {
         Ok(self.folder.clone())
     }
 
-    fn project_folder(&self, _root: &Path) -> Result<ProjectFolder, Error> {
-        Ok(if self.foreign {
-            ProjectFolder::Foreign
-        } else {
-            ProjectFolder::Owned
-        })
+    fn names_in(&self, _folder: &Path) -> Result<Option<BTreeSet<OsString>>, Error> {
+        Ok(self.project_folder.clone())
     }
 
     fn write(&self, project: &Project) -> Result<(), Error> {

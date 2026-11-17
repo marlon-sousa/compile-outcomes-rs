@@ -89,7 +89,7 @@ pub enum Error {
 
     /// The folder where the project would be written holds files compile-outcomes did not write.
     #[error(
-        "The folder {} holds files compile-outcomes did not write, so it was left untouched. Give the compilation another work folder, or create an empty file named {OWNER_MARKER} in that folder to let compile-outcomes replace it.",
+        "The folder {} holds files compile-outcomes did not write, so it was left untouched. Give the compilation another work folder, or create an empty file named {OWNER_MARKER} in that folder to let compile-outcomes replace it and everything in it.",
         .folder.display()
     )]
     #[non_exhaustive]
