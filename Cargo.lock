@@ -199,7 +199,7 @@ checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
 
 [[package]]
 name = "compile-outcomes"
-version = "0.1.0-alpha.1"
+version = "0.1.0"
 dependencies = [
  "cargo_metadata",
  "cucumber",
@@ -1679,7 +1679,7 @@ checksum = "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
 
 [[package]]
 name = "xtask"
-version = "0.1.0-alpha.1"
+version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "strum",

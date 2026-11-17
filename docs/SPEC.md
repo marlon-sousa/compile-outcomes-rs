@@ -10,7 +10,8 @@ Everything this document describes outside this section ships in 0.1.0. These ar
 - dependencies given by git URL, and dependencies that only some snippets get;
 - choosing the target triple, the profile or extra `rustc` flags;
 - a time limit on a compilation;
-- diagnostics with their paths rewritten alike on every platform, such as the snippet folders written as a placeholder, which a later version may add as an option, leaving them as the compiler gave them by default.
+- diagnostics with their paths rewritten alike on every platform, such as the snippet folders written as a placeholder, which a later version may add as an option, leaving them as the compiler gave them by default;
+- a `Display` for `Outcome`, its diagnostics as the compiler rendered them with paths made alike, for failure messages and for comparing with a saved file.
 
 ## 1. Purpose
 

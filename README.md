@@ -174,7 +174,7 @@ Compiler messages change from one Rust version to the next, and compile-outcomes
 
 ### What 0.1.0 does not do yet
 
-Snippets compiled as binaries or tests, dependencies by git URL or for only some snippets, choosing the target, the profile or extra `rustc` flags, a time limit, and diagnostics with their paths rewritten alike on every platform are not part of 0.1.0. [docs/SPEC.md](docs/SPEC.md) describes exactly what it does.
+Snippets compiled as binaries or tests, dependencies by git URL or for only some snippets, choosing the target, the profile or extra `rustc` flags, a time limit, diagnostics with their paths rewritten alike on every platform, and a `Display` for an outcome are not part of 0.1.0. [docs/SPEC.md](docs/SPEC.md) describes exactly what it does.
 
 The minimum supported Rust version is 1.85.
 
