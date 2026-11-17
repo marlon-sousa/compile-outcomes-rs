@@ -10,7 +10,7 @@ pub(crate) fn project(compilation: &Compilation, snippets: &[Snippet]) -> Projec
         edition: compilation.edition(),
         packages: snippets.iter().map(package).collect(),
         dependencies: compilation.dependencies().to_vec(),
-        lockfile: compilation.lockfile_path().map(Into::into),
+        lockfile: compilation.lockfile_path().clone(),
     }
 }
 
