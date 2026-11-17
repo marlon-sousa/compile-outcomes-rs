@@ -1,9 +1,10 @@
 //! Port: what the service needs the world to do, so that its tests can give it a fake world.
 
 use std::collections::BTreeSet;
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-use crate::domain::{BuildReport, Error, Project, ProjectFolder};
+use crate::domain::{BuildReport, Error, Project};
 
 /// The disk: the snippet files and folders a compilation names, and the project it writes.
 pub(crate) trait Disk {
@@ -13,8 +14,8 @@ pub(crate) trait Disk {
     /// Every file of `folder`, not looking into subfolders, or the reason the system gave.
     fn files_in(&self, folder: &Path) -> Result<BTreeSet<PathBuf>, String>;
 
-    /// What is at `root` now, or the error naming it when it cannot be read.
-    fn project_folder(&self, root: &Path) -> Result<ProjectFolder, Error>;
+    /// The name of every entry of `folder`, `None` when there is no such folder, or the error naming it when it cannot be listed.
+    fn names_in(&self, folder: &Path) -> Result<Option<BTreeSet<OsString>>, Error>;
 
     /// Writes the project with the owner marker at its root, replacing whatever an earlier compilation left there.
     fn write(&self, project: &Project) -> Result<(), Error>;

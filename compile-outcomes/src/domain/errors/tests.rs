@@ -42,7 +42,7 @@ fn every_error_reads_as_a_sentence_naming_what_it_is_about() {
             Error::ForeignProjectFolder {
                 folder: PathBuf::from("work/project"),
             },
-            "The folder work/project holds files compile-outcomes did not write, so it was left untouched. Give the compilation another work folder, or create an empty file named .owned-by-compile-outcomes in that folder to let compile-outcomes replace it.",
+            "The folder work/project holds files compile-outcomes did not write, so it was left untouched. Give the compilation another work folder, or create an empty file named .owned-by-compile-outcomes in that folder to let compile-outcomes replace it and everything in it.",
         ),
         (
             Error::UnreadableLockfile {

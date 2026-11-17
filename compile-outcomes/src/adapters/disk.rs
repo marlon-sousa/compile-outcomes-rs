@@ -4,12 +4,12 @@ mod manifest;
 
 use std::collections::BTreeSet;
 use std::env;
-use std::ffi::{OsStr, OsString};
-use std::fs::{self, DirEntry};
+use std::ffi::OsString;
+use std::fs::{self, DirEntry, ReadDir};
 use std::io::{self, ErrorKind};
 use std::path::{Path, PathBuf};
 
-use crate::domain::{Error, OWNER_MARKER, Project, ProjectFolder};
+use crate::domain::{Error, OWNER_MARKER, Project};
 use crate::ports::Disk;
 
 /// The disk of the machine compile-outcomes runs on.
@@ -34,20 +34,14 @@ impl Disk for FileSystem {
         Ok(files)
     }
 
-    fn project_folder(&self, root: &Path) -> Result<ProjectFolder, Error> {
-        let names: BTreeSet<OsString> = match fs::read_dir(root) {
-            Err(error) if error.kind() == ErrorKind::NotFound => return Ok(ProjectFolder::Missing),
+    fn names_in(&self, folder: &Path) -> Result<Option<BTreeSet<OsString>>, Error> {
+        match fs::read_dir(folder) {
+            Err(error) if error.kind() == ErrorKind::NotFound => Ok(None),
             listed => listed
-                .and_then(|entries| entries.map(name_of).collect())
-                .map_err(|error| unwritable(root, &error))?,
-        };
-        Ok(if names.is_empty() {
-            ProjectFolder::Empty
-        } else if names.contains(OsStr::new(OWNER_MARKER)) {
-            ProjectFolder::Owned
-        } else {
-            ProjectFolder::Foreign
-        })
+                .and_then(names)
+                .map(Some)
+                .map_err(|error| unwritable(folder, &error)),
+        }
     }
 
     fn write(&self, project: &Project) -> Result<(), Error> {
@@ -90,6 +84,10 @@ fn write_file(file: &Path, contents: &str) -> Result<(), Error> {
 
 fn path_of(entry: io::Result<DirEntry>) -> io::Result<PathBuf> {
     Ok(entry?.path())
+}
+
+fn names(entries: ReadDir) -> io::Result<BTreeSet<OsString>> {
+    entries.map(name_of).collect()
 }
 
 fn name_of(entry: io::Result<DirEntry>) -> io::Result<OsString> {

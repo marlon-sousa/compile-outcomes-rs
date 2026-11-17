@@ -11,10 +11,10 @@ mod steps;
 
 use cucumber::World;
 use futures::executor::block_on;
-use steps::{Compiling, forget_earlier_projects};
+use steps::{Compiling, forget_earlier_project};
 
 fn main() {
-    forget_earlier_projects();
+    forget_earlier_project();
     let scenarios = Compiling::cucumber()
         .max_concurrent_scenarios(1)
         .fail_on_skipped()

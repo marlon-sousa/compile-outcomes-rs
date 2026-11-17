@@ -1,6 +1,7 @@
 mod fakes;
 
 use std::collections::BTreeSet;
+use std::ffi::OsString;
 use std::path::PathBuf;
 
 use super::compile;
@@ -131,7 +132,7 @@ fn a_lockfile_that_cannot_be_read_is_a_problem_with_the_description() {
 #[test]
 fn a_project_folder_compile_outcomes_did_not_write_is_left_untouched() {
     let disk = FakeDisk {
-        foreign: true,
+        project_folder: Some(BTreeSet::from([OsString::from("notes.txt")])),
         ..FakeDisk::default()
     };
     let cargo = FakeCargo::default();
