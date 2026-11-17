@@ -132,3 +132,32 @@ fn the_names_in_a_folder_are_those_of_its_files_and_of_its_folders_holding_one_a
     let expected = BTreeSet::from([OsString::from("drafts"), OsString::from("notes.txt")]);
     assert_eq!(names, Ok(Some(expected)));
 }
+
+#[test]
+fn a_folder_holding_only_empty_folders_has_no_names() {
+    let folder = TempDir::new().unwrap();
+    fs::create_dir_all(folder.path().join("snippet_a/src")).unwrap();
+    fs::create_dir(folder.path().join("snippet_b")).unwrap();
+
+    assert_eq!(
+        FileSystem.names_in(folder.path()),
+        Ok(Some(BTreeSet::new()))
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn a_symbolic_link_counts_as_a_file_even_to_an_empty_folder() {
+    let folder = TempDir::new().unwrap();
+    fs::create_dir(folder.path().join("empty")).unwrap();
+    fs::create_dir(folder.path().join("links")).unwrap();
+    std::os::unix::fs::symlink(
+        folder.path().join("empty"),
+        folder.path().join("links/to_empty"),
+    )
+    .unwrap();
+
+    let names = FileSystem.names_in(folder.path());
+
+    assert_eq!(names, Ok(Some(BTreeSet::from([OsString::from("links")]))));
+}

@@ -92,10 +92,11 @@ fn names_holding_files(entries: ReadDir) -> io::Result<BTreeSet<OsString>> {
 }
 
 fn name_if_holding_a_file(entry: io::Result<DirEntry>) -> Option<io::Result<OsString>> {
-    entry.and_then(named_if_holding_a_file).transpose()
+    entry.and_then(kept_name).transpose()
 }
 
-fn named_if_holding_a_file(entry: DirEntry) -> io::Result<Option<OsString>> {
+/// The entry's name, if it holds a file.
+fn kept_name(entry: DirEntry) -> io::Result<Option<OsString>> {
     Ok(holds_a_file(&entry)?.then(|| entry.file_name()))
 }
 

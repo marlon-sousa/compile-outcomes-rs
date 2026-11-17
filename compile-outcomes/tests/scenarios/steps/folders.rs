@@ -19,6 +19,11 @@ fn file_of_its_own() -> PathBuf {
     foreign_work_dir().join("project/notes.txt")
 }
 
+/// The work folder whose project folder a CI cache stripped of its files.
+fn stripped_work_dir() -> PathBuf {
+    work_dir().with_extension("stripped")
+}
+
 /// The work folder of the clean builds.
 fn clean_work_dir() -> PathBuf {
     work_dir().with_extension("clean")
@@ -54,11 +59,11 @@ fn a_compilation_with_a_foreign_project(world: &mut Compiling, year: u16) {
     expr = "a compilation in edition {int} whose project folder an earlier compilation wrote, with every file removed and its folders kept"
 )]
 fn a_compilation_with_a_stripped_project(world: &mut Compiling, year: u16) {
-    start_in(world, foreign_work_dir(), year);
+    start_in(world, stripped_work_dir(), year);
     let earlier =
-        Compilation::new(edition(year), foreign_work_dir()).snippet(fixture("snippets/unused.rs"));
+        Compilation::new(edition(year), stripped_work_dir()).snippet(fixture("snippets/unused.rs"));
     compile(&earlier).unwrap();
-    remove_files(&foreign_work_dir().join("project"));
+    remove_files(&stripped_work_dir().join("project"));
 }
 
 /// Removes every file under `folder`, keeping the folders, as `Swatinem/rust-cache` does under `target/`.
