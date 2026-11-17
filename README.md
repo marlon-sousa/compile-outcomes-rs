@@ -39,7 +39,7 @@ fn a_struct_without_a_name_is_refused() -> Result<(), Errors> {
 
 ### Describing a compilation
 
-- `Compilation::new(edition, work_dir)` starts one. `work_dir` is a folder compile-outcomes owns: it writes the project there and keeps the build output between compilations, so the dependencies compile once. A folder under your `target/` suits it, such as one in the `CARGO_TARGET_TMPDIR` Cargo gives integration tests. Two compilations must not share it at the same time, and tests run in parallel, so give each test that compiles its own.
+- `Compilation::new(edition, work_dir)` starts one. `work_dir` is a folder compile-outcomes owns: it writes the project there and keeps the build output between compilations, so the dependencies compile once. A folder under your `target/` suits it, such as one in the `CARGO_TARGET_TMPDIR` Cargo gives integration tests. compile-outcomes marks the project folder it writes there with a file, `.owned-by-compile-outcomes`, and never replaces a folder holding other files without it; create that file to hand such a folder over. Two compilations must not share a work folder at the same time, and tests run in parallel, so give each test that compiles its own.
 - `.snippet(path)` adds one snippet, and `.snippets_in(dir)` every `.rs` file of a folder, not looking into subfolders.
 - `.dependency(Dependency::path(name, path))` or `.dependency(Dependency::version(name, "1.0"))` gives every snippet a dependency, with `.features([...])` and `.without_default_features()` when needed.
 - `.lockfile("Cargo.lock")` makes the dependencies resolve to the versions your own lockfile holds. It is copied, never written.
