@@ -15,10 +15,8 @@ pub(crate) struct Example {
 /// Every marked example of `readme`, in order, or a sentence for a mark that no code block follows.
 pub(crate) fn examples(readme: &str) -> Vec<Result<Example, String>> {
     let lines: Vec<&str> = readme.lines().collect();
-    lines
-        .iter()
-        .enumerate()
-        .filter_map(|(at, line)| Some((marked_file(line)?, lines.get(at + 1..)?)))
+    (0..lines.len())
+        .filter_map(|at| marked(&lines, at))
         .map(example)
         .collect()
 }
@@ -27,7 +25,7 @@ pub(crate) fn examples(readme: &str) -> Vec<Result<Example, String>> {
 pub(crate) fn breach(example: &Example, text: Result<String, String>) -> Option<String> {
     let file = example.file.display();
     match text {
-        Ok(text) if text.contains(&example.block) => None,
+        Ok(text) if holds(&text, &example.block) => None,
         Ok(_) => Some(format!(
             "The README shows an example of {file} that the file does not hold as written; copy the file's lines into the README again."
         )),
@@ -37,8 +35,15 @@ pub(crate) fn breach(example: &Example, text: Result<String, String>) -> Option<
     }
 }
 
-fn marked_file(line: &str) -> Option<&str> {
-    line.strip_prefix(MARKER)?.strip_suffix(" -->")
+/// Whether `text` holds `block` as whole lines, from the start of one of them.
+fn holds(text: &str, block: &str) -> bool {
+    text.starts_with(block) || text.contains(&format!("\n{block}"))
+}
+
+/// The file the line at `at` marks, and the lines after it, if that line is a mark.
+fn marked<'a>(lines: &'a [&'a str], at: usize) -> Option<(&'a str, &'a [&'a str])> {
+    let file = lines.get(at)?.strip_prefix(MARKER)?.strip_suffix(" -->")?;
+    Some((file, lines.get(at + 1..)?))
 }
 
 /// The code block that opens on the first of `after`, the lines that follow the mark of `file`.
