@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use thiserror::Error;
 
-use crate::domain::{Diagnostic, OWNER_MARKER, SnippetName};
+use crate::domain::{CARGO_MARKER, Diagnostic, OWNER_MARKER, SnippetName};
 
 pub use gathered::Errors;
 
@@ -96,6 +96,27 @@ pub enum Error {
     ForeignProjectFolder {
         /// The folder.
         folder: PathBuf,
+    },
+
+    /// For a clean build, the folder of the build output holds files Cargo did not mark as its own.
+    #[error(
+        "The folder {} holds files Cargo did not mark as its build output, with a file named {CARGO_MARKER}, so it was left untouched. Give the compilation another work folder, or remove that folder yourself.",
+        .folder.display()
+    )]
+    #[non_exhaustive]
+    ForeignTargetFolder {
+        /// The folder.
+        folder: PathBuf,
+    },
+
+    /// For a clean build, the build output could not be removed.
+    #[error("The build output at {} could not be removed: {reason}", .folder.display())]
+    #[non_exhaustive]
+    Unremovable {
+        /// The folder of the build output.
+        folder: PathBuf,
+        /// The reason the system gave.
+        reason: String,
     },
 
     /// Cargo could not be started.

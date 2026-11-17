@@ -1,7 +1,7 @@
 mod fakes;
+mod ownership;
 
 use std::collections::BTreeSet;
-use std::ffi::OsString;
 use std::path::PathBuf;
 
 use super::compile;
@@ -127,24 +127,4 @@ fn a_lockfile_that_cannot_be_read_is_a_problem_with_the_description() {
         }]
     );
     assert!(disk.written.borrow().is_empty());
-}
-
-#[test]
-fn a_project_folder_compile_outcomes_did_not_write_is_left_untouched() {
-    let disk = FakeDisk {
-        project_folder: Some(BTreeSet::from([OsString::from("notes.txt")])),
-        ..FakeDisk::default()
-    };
-    let cargo = FakeCargo::default();
-
-    let errors = compile(&compilation(), &disk, &cargo).unwrap_err();
-
-    assert_eq!(
-        errors.into_iter().collect::<Vec<_>>(),
-        [Error::ForeignProjectFolder {
-            folder: PathBuf::from("work/project")
-        }]
-    );
-    assert!(disk.written.borrow().is_empty());
-    assert!(cargo.builds.borrow().is_empty());
 }

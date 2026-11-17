@@ -17,6 +17,9 @@ pub(crate) trait Disk {
     /// The name of every entry of `folder`, `None` when there is no such folder, or the error naming it when it cannot be listed.
     fn names_in(&self, folder: &Path) -> Result<Option<BTreeSet<OsString>>, Error>;
 
+    /// Removes `folder` and everything in it, if it is there, or gives the error naming it.
+    fn remove(&self, folder: &Path) -> Result<(), Error>;
+
     /// Writes the project with the owner marker at its root, replacing whatever an earlier compilation left there.
     fn write(&self, project: &Project) -> Result<(), Error>;
 }

@@ -1,4 +1,4 @@
-//! Entity: what the disk holds where a compilation writes its project, and whose it is.
+//! Entity: what the disk holds where a compilation writes, and whose it is.
 
 use strum::EnumIs;
 
@@ -7,15 +7,18 @@ use strum::EnumIs;
 /// A user who creates it in an existing folder hands that folder over, to be replaced.
 pub(crate) const OWNER_MARKER: &str = ".owned-by-compile-outcomes";
 
-/// What the disk holds at a project's root before the project is written.
+/// The file Cargo writes into every target folder it makes, marking it as build output.
+pub(crate) const CARGO_MARKER: &str = "CACHEDIR.TAG";
+
+/// What the disk holds at a folder compile-outcomes would replace or remove.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIs)]
-pub(crate) enum ProjectFolder {
+pub(crate) enum OwnedFolder {
     /// Nothing is there yet.
     Missing,
     /// An empty folder.
     Empty,
-    /// A folder holding the owner marker.
+    /// A folder holding the marker of whoever wrote it.
     Owned,
-    /// A folder holding files, without the owner marker.
+    /// A folder holding files, without that marker.
     Foreign,
 }

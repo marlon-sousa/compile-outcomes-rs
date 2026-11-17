@@ -3,6 +3,7 @@
 use std::path::PathBuf;
 
 use getset::{CopyGetters, Getters};
+use strum::EnumIs;
 
 use crate::domain::{Dependency, Edition};
 
@@ -21,6 +22,15 @@ pub struct Compilation {
     dependencies: Vec<Dependency>,
     #[getset(get = "pub(crate)")]
     lockfile_path: Option<PathBuf>,
+    #[getset(get_copy = "pub(crate)")]
+    build: Build,
+}
+
+/// Whether a compilation reuses the build output an earlier one left, or removes it first.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIs)]
+pub(crate) enum Build {
+    Reusing,
+    Clean,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -40,6 +50,7 @@ impl Compilation {
             sources: Vec::new(),
             dependencies: Vec::new(),
             lockfile_path: None,
+            build: Build::Reusing,
         }
     }
 
@@ -70,6 +81,15 @@ impl Compilation {
     #[must_use]
     pub fn lockfile(mut self, path: impl Into<PathBuf>) -> Self {
         self.lockfile_path = Some(path.into());
+        self
+    }
+
+    /// Removes the build output in `work_dir` before building, so that every crate compiles again, dependencies included, as after `cargo clean`.
+    ///
+    /// The build output is removed only when Cargo marked it as its own, with a file named `CACHEDIR.TAG`.
+    #[must_use]
+    pub fn clean_build(mut self) -> Self {
+        self.build = Build::Clean;
         self
     }
 }

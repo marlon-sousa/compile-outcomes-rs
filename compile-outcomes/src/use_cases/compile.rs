@@ -2,7 +2,9 @@
 
 use std::path::Path;
 
-use crate::domain::{Compilation, Error, Errors, Found, Outcomes, Snippet, SnippetSource};
+use crate::domain::{
+    Build, Compilation, Error, Errors, Found, Outcomes, Project, Snippet, SnippetSource,
+};
 use crate::ports::{Cargo, Disk};
 use crate::use_cases::{naming, outcomes, ownership, project};
 
@@ -23,16 +25,32 @@ pub(crate) fn compile(
         .and_then(|lockfile| unreadable_lockfile(lockfile, disk));
     let snippets = described(naming::snippets(found), lockfile)?;
     let project = project::project(compilation, &snippets);
-    let names = disk.names_in(&project.root)?;
-    if ownership::project_folder(names.as_ref()).is_foreign() {
-        return Err(Error::ForeignProjectFolder {
-            folder: project.root,
-        }
-        .into());
-    }
+    untouched_unless_owned(&project, compilation.build(), disk)?;
     disk.write(&project)?;
+    if compilation.build().is_clean() {
+        disk.remove(&project.target_dir)?;
+    }
     let report = cargo.build(&project)?;
     Ok(outcomes::outcomes(&snippets, report)?)
+}
+
+/// Refuses a project folder compile-outcomes did not write, and for a clean build a target folder Cargo did not make, before either is changed.
+fn untouched_unless_owned(project: &Project, build: Build, disk: &impl Disk) -> Result<(), Error> {
+    let held = disk.names_in(&project.root)?;
+    if ownership::project_folder(held.as_ref()).is_foreign() {
+        return Err(Error::ForeignProjectFolder {
+            folder: project.root.clone(),
+        });
+    }
+    if build.is_clean() {
+        let held = disk.names_in(&project.target_dir)?;
+        if ownership::target_folder(held.as_ref()).is_foreign() {
+            return Err(Error::ForeignTargetFolder {
+                folder: project.target_dir.clone(),
+            });
+        }
+    }
+    Ok(())
 }
 
 fn find(source: &SnippetSource, disk: &impl Disk) -> Found {

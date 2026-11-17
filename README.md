@@ -43,6 +43,7 @@ fn a_struct_without_a_name_is_refused() -> Result<(), Errors> {
 - `.snippet(path)` adds one snippet, and `.snippets_in(dir)` every `.rs` file of a folder, not looking into subfolders.
 - `.dependency(Dependency::path(name, path))` or `.dependency(Dependency::version(name, "1.0"))` gives every snippet a dependency, with `.features([...])` and `.without_default_features()` when needed.
 - `.lockfile("Cargo.lock")` makes the dependencies resolve to the versions your own lockfile holds. It is copied, never written.
+- `.clean_build()` removes the build output in `work_dir` first, so that every crate compiles again, dependencies included, as after `cargo clean`. It removes only a target folder Cargo marked as its own with a `CACHEDIR.TAG` file.
 
 A relative path is taken from the current folder, which for a test is its crate's folder.
 

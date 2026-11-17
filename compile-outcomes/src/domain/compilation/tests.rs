@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use super::{Compilation, SnippetSource};
+use super::{Build, Compilation, SnippetSource};
 use crate::domain::{Dependency, Edition};
 
 #[test]
@@ -12,6 +12,14 @@ fn a_new_compilation_has_nothing_but_its_edition_and_folder() {
     assert!(compilation.sources().is_empty());
     assert!(compilation.dependencies().is_empty());
     assert_eq!(compilation.lockfile_path(), &None);
+    assert_eq!(compilation.build(), Build::Reusing);
+}
+
+#[test]
+fn a_clean_build_removes_the_build_output_first() {
+    let compilation = Compilation::new(Edition::E2021, "work").clean_build();
+
+    assert_eq!(compilation.build(), Build::Clean);
 }
 
 #[test]

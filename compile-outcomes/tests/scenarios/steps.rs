@@ -1,5 +1,6 @@
 //! The steps of the scenarios, and the compilation they describe.
 
+mod folders;
 mod given;
 mod then;
 
@@ -27,16 +28,6 @@ pub(crate) fn forget_earlier_project() {
     if project.exists() {
         fs::remove_dir_all(project).unwrap();
     }
-}
-
-/// The work folder whose project folder holds a file compile-outcomes did not write.
-fn foreign_work_dir() -> PathBuf {
-    work_dir().with_extension("foreign")
-}
-
-/// The file of its own in the project folder of [`foreign_work_dir`].
-fn file_of_its_own() -> PathBuf {
-    foreign_work_dir().join("project/notes.txt")
 }
 
 /// A fixture, as a path relative to the crate's folder, where `cargo test` runs the scenarios.

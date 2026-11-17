@@ -130,3 +130,26 @@ fn the_names_in_a_folder_are_those_of_its_files_and_folders() {
     let expected = BTreeSet::from([OsString::from("drafts"), OsString::from("notes.txt")]);
     assert_eq!(names, Ok(Some(expected)));
 }
+
+#[test]
+fn removing_a_folder_removes_everything_in_it_and_a_missing_one_is_already_removed() {
+    let folder = TempDir::new().unwrap();
+    let target = folder.path().join("target");
+    fs::create_dir_all(target.join("debug")).unwrap();
+    fs::write(target.join("debug/stale"), "").unwrap();
+
+    assert_eq!(FileSystem.remove(&target), Ok(()));
+    assert!(!target.exists());
+    assert_eq!(FileSystem.remove(&target), Ok(()));
+}
+
+#[test]
+fn a_file_that_cannot_be_removed_as_a_folder_names_it() {
+    let folder = TempDir::new().unwrap();
+    let file = folder.path().join("target");
+    fs::write(&file, "").unwrap();
+
+    let error = FileSystem.remove(&file).unwrap_err();
+
+    assert!(matches!(error, Error::Unremovable { folder, .. } if folder == file));
+}

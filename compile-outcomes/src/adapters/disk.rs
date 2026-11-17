@@ -44,6 +44,16 @@ impl Disk for FileSystem {
         }
     }
 
+    fn remove(&self, folder: &Path) -> Result<(), Error> {
+        match fs::remove_dir_all(folder) {
+            Err(error) if error.kind() != ErrorKind::NotFound => Err(Error::Unremovable {
+                folder: folder.to_owned(),
+                reason: error.to_string(),
+            }),
+            _ => Ok(()),
+        }
+    }
+
     fn write(&self, project: &Project) -> Result<(), Error> {
         let base = env::current_dir().map_err(|error| unwritable(&project.root, &error))?;
         replace_folder(&project.root)?;

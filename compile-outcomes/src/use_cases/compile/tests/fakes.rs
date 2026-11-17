@@ -1,19 +1,20 @@
 //! Test support: a disk and a Cargo whose answers each test gives, recording what the service asks of them.
 
 use std::cell::RefCell;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
 use crate::domain::{BuildReport, Error, Project};
 use crate::ports::{Cargo, Disk};
 
-/// A disk whose files and folders are given, and which records each project it writes.
+/// A disk whose files, folders and names are given, and which records each project it writes and each folder it removes.
 #[derive(Default)]
 pub(super) struct FakeDisk {
     pub(super) unreadable: Vec<PathBuf>,
     pub(super) folder: BTreeSet<PathBuf>,
-    pub(super) project_folder: Option<BTreeSet<OsString>>,
+    pub(super) names: BTreeMap<PathBuf, BTreeSet<OsString>>,
+    pub(super) removed: RefCell<Vec<PathBuf>>,
     pub(super) refuses_writing: bool,
     pub(super) written: RefCell<Vec<Project>>,
 }
@@ -31,8 +32,13 @@ impl Disk for FakeDisk {
         Ok(self.folder.clone())
     }
 
-    fn names_in(&self, _folder: &Path) -> Result<Option<BTreeSet<OsString>>, Error> {
-        Ok(self.project_folder.clone())
+    fn names_in(&self, folder: &Path) -> Result<Option<BTreeSet<OsString>>, Error> {
+        Ok(self.names.get(folder).cloned())
+    }
+
+    fn remove(&self, folder: &Path) -> Result<(), Error> {
+        self.removed.borrow_mut().push(folder.to_owned());
+        Ok(())
     }
 
     fn write(&self, project: &Project) -> Result<(), Error> {
