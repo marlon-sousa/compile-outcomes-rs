@@ -8,7 +8,7 @@ compile-outcomes is made for test suites that check what a library tells its use
 
 [trybuild](https://crates.io/crates/trybuild) is excellent, and it is the right choice when what you want is a snapshot: it compares what the compiler wrote for each test case with a saved `.stderr` file, and rewrites the paths and details that differ between machines so the files stay stable. Much of the Rust ecosystem tests its macros with it.
 
-compile-outcomes answers a different need. It hands your tests what the compiler said, as data: for each snippet, whether it compiled, and each error and warning with its message, its code and the line and column it points at. It judges nothing, so your test framework decides what matters, whether that is one error code, a few words of a message, or the whole text. And since it never compares whole texts, a test that checks codes and locations survives most compiler upgrades.
+compile-outcomes answers a different need. It hands your tests what the compiler said, as data: for each snippet, whether it compiled, and each error and warning with its message, its code and the line and column it points at. It judges nothing, so your test framework decides what matters, whether that is one error code, a few words of a message, or the whole text. And since it never compares whole texts, a test that checks codes and locations is less affected by compiler upgrades than one comparing whole texts.
 
 ## Using it
 
@@ -67,13 +67,15 @@ Every snippet of `tests/ui` compiles once, the first time a scenario asks, and e
 use std::path::Path;
 use std::sync::LazyLock;
 
-use compile_outcomes::{Compilation, Edition, Outcome, Outcomes, compile};
+use compile_outcomes::{Compilation, Dependency, Edition, Outcome, Outcomes, compile};
 use cucumber::{World, given, then, when};
 
 /// Every snippet of tests/ui, compiled once, the first time a scenario asks.
 static OUTCOMES: LazyLock<Outcomes> = LazyLock::new(|| {
     let work_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("ui");
-    let compilation = Compilation::new(Edition::E2021, work_dir).snippets_in("tests/ui");
+    let compilation = Compilation::new(Edition::E2021, work_dir)
+        .snippets_in("tests/ui")
+        .dependency(Dependency::path("my_macros", "."));
     compile(&compilation).expect("the compilation is well described")
 });
 
