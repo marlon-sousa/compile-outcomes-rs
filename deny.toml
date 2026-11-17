@@ -1,0 +1,27 @@
+# What `cargo deny check` allows of the dependencies: their licences, the
+# advisories against them, duplicate versions, and where they come from.
+
+[graph]
+all-features = true
+
+[advisories]
+version = 2
+ignore = [
+    { id = "RUSTSEC-2026-0542", reason = "used only by cucumber in the scenarios, with no upgrade" },
+]
+
+[licenses]
+version = 2
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Unicode-3.0",
+]
+unused-allowed-license = "allow"
+
+[bans]
+multiple-versions = "warn"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

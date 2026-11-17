@@ -1,0 +1,17 @@
+[package]
+name = "my_macros"
+description = "The crate the README's examples test, so that the gate checks they work"
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dev-dependencies]
+compile-outcomes = { path = "../../compile-outcomes" }
+cucumber = { workspace = true }
+futures = { workspace = true }
+
+[[test]]
+name = "ui"
+harness = false
