@@ -37,21 +37,3 @@ fn outcomes_are_iterated_in_the_order_of_the_names() {
 
     assert_eq!(names, ["apple", "zebra"]);
 }
-
-#[test]
-fn a_compiled_snippet_has_warnings_and_no_errors() {
-    let outcomes = outcomes();
-    let zebra = outcomes.get("zebra").unwrap();
-
-    assert!(zebra.errors().is_empty());
-    assert_eq!(zebra.warnings(), [diagnostic("unused variable")]);
-}
-
-#[test]
-fn a_failed_snippet_has_its_errors_and_its_warnings() {
-    let outcomes = outcomes();
-    let apple = outcomes.get("apple").unwrap();
-
-    assert_eq!(apple.errors(), [diagnostic("missing field")]);
-    assert!(apple.warnings().is_empty());
-}

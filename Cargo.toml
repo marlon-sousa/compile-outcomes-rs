@@ -4,6 +4,8 @@ members = [
     "compile-outcomes",
     "xtask",
 ]
+# Crates the scenarios compile snippets against, each a workspace of its own.
+exclude = ["compile-outcomes/tests/fixtures"]
 
 [workspace.package]
 version = "0.1.0"
@@ -27,10 +29,15 @@ todo = "deny"
 unimplemented = "deny"
 
 [workspace.dependencies]
+cargo_metadata = "0.20"
+cucumber = "0.21"
 delegate = "0.13.5"
 derive_more = { version = "2.1", features = ["display", "into_iterator"] }
+futures = "0.3"
 getset = "0.1.7"
 proc-macro2 = { version = "1.0", features = ["span-locations"] }
 strum = { version = "0.27", features = ["derive"] }
 syn = { version = "2.0", features = ["full", "visit"] }
+tempfile = "3"
 thiserror = "2.0"
+toml = "1.2"

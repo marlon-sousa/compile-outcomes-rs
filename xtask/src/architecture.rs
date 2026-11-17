@@ -6,7 +6,11 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 /// The folders the check reads, relative to the workspace's root.
-pub(crate) const FOLDERS: [&str; 2] = ["compile-outcomes/src", "xtask/src"];
+pub(crate) const FOLDERS: [&str; 3] = [
+    "compile-outcomes/src",
+    "compile-outcomes/tests",
+    "xtask/src",
+];
 
 /// The folder whose `domain` and `use_cases` modules do no input or output.
 const LIBRARY: &str = "compile-outcomes/src";

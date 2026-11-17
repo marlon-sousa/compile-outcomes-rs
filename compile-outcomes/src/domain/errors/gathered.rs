@@ -32,6 +32,12 @@ impl Errors {
         })
     }
 
+    /// These errors, then `error`.
+    pub(crate) fn and(mut self, error: Error) -> Self {
+        self.rest.push(error);
+        self
+    }
+
     /// Every problem, in the order they were found.
     pub fn iter(&self) -> impl Iterator<Item = &Error> {
         self.into_iter()

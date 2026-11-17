@@ -39,6 +39,13 @@ fn every_error_reads_as_a_sentence_naming_what_it_is_about() {
             "The snippet folder ui could not be read: No such file or directory (os error 2)",
         ),
         (
+            Error::UnreadableLockfile {
+                lockfile: PathBuf::from("Cargo.lock"),
+                reason: "No such file or directory (os error 2)".to_owned(),
+            },
+            "The lockfile Cargo.lock could not be read: No such file or directory (os error 2)",
+        ),
+        (
             Error::Unwritable {
                 path: PathBuf::from("work/project"),
                 reason: "Permission denied (os error 13)".to_owned(),
@@ -47,7 +54,7 @@ fn every_error_reads_as_a_sentence_naming_what_it_is_about() {
         ),
         (
             Error::CargoNotStarted {
-                program: "cargo".to_owned(),
+                program: PathBuf::from("cargo"),
                 reason: "No such file or directory (os error 2)".to_owned(),
             },
             "Cargo, run as cargo, could not be started: No such file or directory (os error 2)",
@@ -88,7 +95,7 @@ fn gathered_errors_keep_the_order_they_were_found() {
     let errors = Errors::gathered(vec![
         Error::NoSnippet,
         Error::CargoNotStarted {
-            program: "cargo".to_owned(),
+            program: PathBuf::from("cargo"),
             reason: "gone".to_owned(),
         },
     ])
@@ -99,7 +106,7 @@ fn gathered_errors_keep_the_order_they_were_found() {
     assert_eq!(
         errors.into_iter().last(),
         Some(Error::CargoNotStarted {
-            program: "cargo".to_owned(),
+            program: PathBuf::from("cargo"),
             reason: "gone".to_owned()
         })
     );
@@ -110,7 +117,7 @@ fn errors_display_one_sentence_a_line() {
     let errors = Errors::gathered(vec![
         Error::NoSnippet,
         Error::CargoNotStarted {
-            program: "cargo".to_owned(),
+            program: PathBuf::from("cargo"),
             reason: "gone".to_owned(),
         },
     ])

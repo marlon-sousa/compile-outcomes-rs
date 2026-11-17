@@ -14,7 +14,9 @@ mod snippet_name;
 
 pub(crate) use build_report::{BuildReport, CompilerMessage, Level};
 pub use compilation::Compilation;
+pub(crate) use compilation::SnippetSource;
 pub use dependency::Dependency;
+pub(crate) use dependency::Source;
 pub use diagnostic::{Diagnostic, Location};
 pub use edition::Edition;
 pub use errors::{Error, Errors};

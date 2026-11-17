@@ -67,6 +67,16 @@ pub enum Error {
         reason: String,
     },
 
+    /// The lockfile given to copy into the project could not be read.
+    #[error("The lockfile {} could not be read: {reason}", .lockfile.display())]
+    #[non_exhaustive]
+    UnreadableLockfile {
+        /// The lockfile.
+        lockfile: PathBuf,
+        /// The reason the system gave.
+        reason: String,
+    },
+
     /// The generated project, or the lockfile copied into it, could not be written.
     #[error("The project could not be written at {}: {reason}", .path.display())]
     #[non_exhaustive]
@@ -78,11 +88,11 @@ pub enum Error {
     },
 
     /// Cargo could not be started.
-    #[error("Cargo, run as {program}, could not be started: {reason}")]
+    #[error("Cargo, run as {}, could not be started: {reason}", .program.display())]
     #[non_exhaustive]
     CargoNotStarted {
         /// The program run, as the `CARGO` environment variable named it, or `cargo`.
-        program: String,
+        program: PathBuf,
         /// The reason the system gave.
         reason: String,
     },

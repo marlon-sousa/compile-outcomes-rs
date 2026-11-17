@@ -21,7 +21,7 @@ It is made for test suites that check what a library tells its users when they m
 
 A `Compilation` describes one compilation. It is built step by step, and each step returns it:
 
-1. `Compilation::new(edition, work_dir)` starts one. `edition` is an `Edition`: `E2015`, `E2018`, `E2021` or `E2024`. `work_dir` is a folder compile-outcomes owns: it writes the project it builds there, and reuses the build output there from one compilation to the next.
+1. `Compilation::new(edition, work_dir)` starts one. `edition` is an `Edition`: `E2015`, `E2018`, `E2021` or `E2024`. `work_dir` is a folder compile-outcomes owns: it writes the project it builds there, and reuses the build output there from one compilation to the next. Two compilations must not use the same `work_dir` at the same time.
 2. `.snippet(path)` adds the snippet in the file `path`, whatever its extension.
 3. `.snippets_in(dir)` adds every file of `dir` whose extension is `rs`, not looking into subfolders.
 4. `.dependency(dependency)` gives every snippet a dependency, a `Dependency`:
@@ -32,6 +32,8 @@ A `Compilation` describes one compilation. It is built step by step, and each st
 5. `.lockfile(path)` copies that `Cargo.lock` into the project before building, so that the dependencies resolve to the versions it holds, such as those of the caller's own workspace. Cargo still updates the copy where it must, and the original is never written.
 
 Describing a compilation touches nothing on disk; only compiling it does.
+
+A relative path, whether of a snippet, a folder, a dependency, the lockfile or the work folder, is taken from the current folder, which for a test is its crate's folder.
 
 ## 3. Snippets
 
@@ -46,13 +48,13 @@ Describing a compilation touches nothing on disk; only compiling it does.
 `compile_outcomes::compile(&compilation)` compiles every snippet and returns either the `Outcomes` or the `Errors` that kept it from them.
 
 1. It writes the generated workspace to `work_dir/project`, replacing whatever an earlier compilation left there, and copies the lockfile into it when one was given.
-2. It runs `cargo build --workspace --keep-going --message-format=json` there, with the target folder `work_dir/target`. `--keep-going` lets every snippet compile even when an earlier one failed.
+2. It runs `cargo build --workspace --keep-going --message-format=json --color=never` there, with the target folder `work_dir/target`. `--keep-going` lets every snippet compile even when an earlier one failed, and `--color=never` keeps what Cargo writes free of terminal colour codes, which a screen reader would read aloud.
 3. It runs the `cargo` the `CARGO` environment variable names, which Cargo sets for the tests and build scripts it runs, so a suite compiles its snippets with its own toolchain; otherwise the `cargo` found on the `PATH`.
 4. Cargo works as configured for the user: its network access, its registries and its environment variables apply.
 
 ## 5. Outcomes
 
-1. **`Outcomes` holds one `Outcome` for every snippet**, looked up with `.get(name)`, where `name` is the snippet's name as a `&str`, and iterated, with `.iter()` or a `for` loop over `&outcomes`, as pairs of a `SnippetName` and its `Outcome`, in the order of the names. A `SnippetName` gives the name with `.as_str()`, and displays as it.
+1. **`Outcomes` holds one `Outcome` for every snippet**, looked up with `.get(name)`, where `name` is the snippet's name as a `&str`, and iterated in the order of the names: with `.iter()` or a `for` loop over `&outcomes`, as pairs of a `&SnippetName` and its `&Outcome`, or with a `for` loop over `outcomes`, taking them, as pairs of a `SnippetName` and its `Outcome`. A `SnippetName` gives the name with `.as_str()`, and displays as it.
 2. **An `Outcome` is `Compiled { warnings }` or `Failed { errors, warnings }`.** A snippet compiled when Cargo produced its crate; it failed when the compiler reported errors for it. `.is_compiled()` and `.is_failed()` tell which, and `.errors()` and `.warnings()` give them whatever the outcome, no errors for a snippet that compiled.
 3. **A `Diagnostic` is one message of the compiler**, with:
    - `message`, its first line, such as ``cannot find function `shout` in crate `greeting` ``;
@@ -67,12 +69,13 @@ Describing a compilation touches nothing on disk; only compiling it does.
 `Errors` holds every problem that kept a compilation from its outcomes, in the order they were found, and is never empty: `.first()` gives the first, and `.iter()`, or a `for` loop over it, every one. Each `Error` is a sentence that names what it is about, and `Errors` reads as those sentences, each starting on a line of its own.
 
 1. **Problems with the description are reported together**, before anything is written:
-   - a compilation with no snippet, when every file and folder it names could be read;
+   - a compilation with no snippet, when every snippet file and folder it names could be read;
    - a snippet whose name breaks §3, rule 2, naming its file;
    - two snippets with the same name, or names that differ only by `-` and `_`, naming both files;
-   - a snippet file, or a folder given to `.snippets_in`, that cannot be read, naming which, with the reason the system gave.
+   - a snippet file, or a folder given to `.snippets_in`, that cannot be read, naming which, with the reason the system gave; a folder given to `.snippet` is a file that cannot be read;
+   - a lockfile given to `.lockfile` that cannot be read, naming it, with the reason the system gave.
 2. **Problems while compiling stop it**, and are reported alone:
-   - the project or the lockfile cannot be written, with the reason the system gave;
+   - the project, or the copy of the lockfile, cannot be written, naming what could not be written, with the reason the system gave;
    - Cargo cannot be started, naming the program run, with the reason the system gave;
    - Cargo stops without building any snippet and without a compiler message, such as when a dependency cannot be found or resolved, with what it wrote to its error output;
    - a dependency fails to compile, naming it, with its errors;

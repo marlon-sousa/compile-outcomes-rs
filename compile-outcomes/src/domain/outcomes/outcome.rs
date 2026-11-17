@@ -37,3 +37,6 @@ impl Outcome {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

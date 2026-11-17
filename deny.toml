@@ -6,6 +6,9 @@ all-features = true
 
 [advisories]
 version = 2
+ignore = [
+    { id = "RUSTSEC-2026-0542", reason = "used only by cucumber in the scenarios, with no upgrade" },
+]
 
 [licenses]
 version = 2

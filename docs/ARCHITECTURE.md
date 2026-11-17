@@ -12,7 +12,7 @@ compile-outcomes does input and output, so it has ports: a port is a trait the s
 
 ## The repository
 
-- **`compile-outcomes/`**, the crate users depend on, laid out as the rest of this document describes.
+- **`compile-outcomes/`**, the crate users depend on, laid out as the rest of this document describes. Its `tests/` folder holds the Gherkin scenarios: the features, `tests/features/`; their steps, the test target `tests/scenarios/`; and what they compile, `tests/fixtures/`, snippets and two small crates, `greeting` and `broken`, which the workspace excludes.
 - **`xtask/`**, the quality gate, `cargo xtask ci`, whose checks CI runs, the tests on Linux, macOS and Windows; [WORKFLOW.md](WORKFLOW.md), section 7, lists them.
 - **`.github/workflows/`**, the CI, pull request and weekly workflows, as [WORKFLOW.md](WORKFLOW.md), section 7, lists them.
 - **`clippy.toml`**, what clippy allows in tests.
@@ -104,7 +104,7 @@ Cheapest first:
 1. **Policy tests**, pure and in memory: the names, the project and the outcomes.
 2. **Service tests**, the service over fake ports, checking the order of its steps and the errors it stops at.
 3. **Adapter tests**: the Cargo adapter's translation of messages Cargo wrote, from their JSON; the disk adapter writing a project into a temporary folder.
-4. **Gherkin scenarios**, `tests/features/`, which compile real snippets with the real Cargo against a small dependency of their own, and check what a user reads in the outcomes.
+4. **Gherkin scenarios**, `tests/features/`, which compile real snippets with the real Cargo against small dependencies of their own, `greeting` and `broken`, and one from crates.io, resolved with a lockfile of their own that pins an older version, and check what a user reads in the outcomes.
 
 How a test is written:
 
