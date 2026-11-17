@@ -15,10 +15,10 @@ pub(crate) const CARGO_MARKER: &str = "CACHEDIR.TAG";
 pub(crate) enum OwnedFolder {
     /// Nothing is there yet.
     Missing,
-    /// An empty folder.
+    /// A folder holding no file at any depth: empty, or holding only empty folders, as one a CI cache stripped of its files.
     Empty,
     /// A folder holding the marker of whoever wrote it.
     Owned,
-    /// A folder holding files, without that marker.
+    /// A folder holding a file, without that marker.
     Foreign,
 }

@@ -37,7 +37,7 @@ use adapters::{CargoProcess, FileSystem};
 ///
 /// It runs the `cargo` the `CARGO` environment variable names, which Cargo sets for the tests it runs, otherwise the one on the `PATH`.
 ///
-/// It replaces `work_dir/project` only when that folder is missing, empty or holds the file `.owned-by-compile-outcomes`, which it writes there itself; a folder holding other files is left untouched, and the compilation refused.
+/// It replaces `work_dir/project` only when that folder is missing, holds no file at any depth, or holds the file `.owned-by-compile-outcomes`, which it writes there itself; a folder holding other files is left untouched, and the compilation refused.
 ///
 /// Two compilations must not share a `work_dir` at the same time, since each replaces the project the other is building. Tests run in parallel by default, so give each test that compiles its own `work_dir`.
 ///

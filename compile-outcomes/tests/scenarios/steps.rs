@@ -4,7 +4,6 @@ mod folders;
 mod given;
 mod then;
 
-use std::fs;
 use std::path::PathBuf;
 
 use compile_outcomes::{Compilation, Errors, Outcomes, compile};
@@ -20,14 +19,6 @@ pub(crate) struct Compiling {
 /// The folder every scenario compiles in, one after the other, so that the build of the dependencies is shared.
 fn work_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("scenarios")
-}
-
-/// Removes the project folder an earlier run left, keeping the build output.
-pub(crate) fn forget_earlier_project() {
-    let project = work_dir().join("project");
-    if project.exists() {
-        fs::remove_dir_all(project).unwrap();
-    }
 }
 
 /// A fixture, as a path relative to the crate's folder, where `cargo test` runs the scenarios.

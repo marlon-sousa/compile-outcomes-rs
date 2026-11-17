@@ -86,7 +86,7 @@ impl Compilation {
 
     /// Runs `cargo clean` on the build output, `work_dir/target`, before building, so that every crate compiles again, dependencies included.
     ///
-    /// The target folder is cleaned when it is missing, empty or holds `CACHEDIR.TAG`, the file Cargo writes into a target folder it makes; otherwise compiling is refused with [`Error::ForeignTargetFolder`](crate::Error::ForeignTargetFolder), and the folder left untouched. Cargo may still refuse to clean it, such as an empty folder from Cargo 1.97 on, which gives [`Error::TargetFolderNotCleaned`](crate::Error::TargetFolderNotCleaned).
+    /// The target folder is cleaned when it is missing, holds no file at any depth, or holds `CACHEDIR.TAG`, the file Cargo writes into a target folder it makes; otherwise compiling is refused with [`Error::ForeignTargetFolder`](crate::Error::ForeignTargetFolder), and the folder left untouched. Cargo may still refuse to clean it, such as an empty folder from Cargo 1.97 on, which gives [`Error::TargetFolderNotCleaned`](crate::Error::TargetFolderNotCleaned).
     #[must_use]
     pub fn clean_build(mut self) -> Self {
         self.build = Build::Clean;

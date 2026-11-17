@@ -120,10 +120,12 @@ fn a_missing_folder_has_no_names() {
 }
 
 #[test]
-fn the_names_in_a_folder_are_those_of_its_files_and_folders() {
+fn the_names_in_a_folder_are_those_of_its_files_and_of_its_folders_holding_one_at_any_depth() {
     let folder = TempDir::new().unwrap();
     fs::write(folder.path().join("notes.txt"), "").unwrap();
-    fs::create_dir(folder.path().join("drafts")).unwrap();
+    fs::create_dir_all(folder.path().join("drafts/old")).unwrap();
+    fs::write(folder.path().join("drafts/old/plan.txt"), "").unwrap();
+    fs::create_dir_all(folder.path().join("stripped/src")).unwrap();
 
     let names = FileSystem.names_in(folder.path());
 

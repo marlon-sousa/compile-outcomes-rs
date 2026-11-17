@@ -1,7 +1,7 @@
 //! The steps about the folders compile-outcomes replaces or removes, each scenario in a work folder of its own, so that the others keep their build output.
 
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use compile_outcomes::{Compilation, compile};
 use cucumber::{given, then};
@@ -48,6 +48,29 @@ fn a_compilation_with_a_foreign_project(world: &mut Compiling, year: u16) {
     start_in(world, foreign_work_dir(), year);
     fs::create_dir_all(foreign_work_dir().join("project")).unwrap();
     fs::write(file_of_its_own(), "mine").unwrap();
+}
+
+#[given(
+    expr = "a compilation in edition {int} whose project folder an earlier compilation wrote, with every file removed and its folders kept"
+)]
+fn a_compilation_with_a_stripped_project(world: &mut Compiling, year: u16) {
+    start_in(world, foreign_work_dir(), year);
+    let earlier =
+        Compilation::new(edition(year), foreign_work_dir()).snippet(fixture("snippets/unused.rs"));
+    compile(&earlier).unwrap();
+    remove_files(&foreign_work_dir().join("project"));
+}
+
+/// Removes every file under `folder`, keeping the folders, as `Swatinem/rust-cache` does under `target/`.
+fn remove_files(folder: &Path) {
+    for entry in fs::read_dir(folder).unwrap() {
+        let path = entry.unwrap().path();
+        if path.is_dir() {
+            remove_files(&path);
+        } else {
+            fs::remove_file(path).unwrap();
+        }
+    }
 }
 
 #[given("the project folder is handed over to compile-outcomes")]

@@ -14,7 +14,9 @@ pub(crate) trait Disk {
     /// Every file of `folder`, not looking into subfolders, or the reason the system gave.
     fn files_in(&self, folder: &Path) -> Result<BTreeSet<PathBuf>, String>;
 
-    /// The name of every entry of `folder`, `None` when there is no such folder, or the reason the system gave.
+    /// The name of every entry of `folder` that is a file or holds one at any depth, `None` when there is no such folder, or the reason the system gave.
+    ///
+    /// A folder holding only empty folders has no such entry, as one a CI cache stripped of its files, keeping its folders.
     fn names_in(&self, folder: &Path) -> Result<Option<BTreeSet<OsString>>, String>;
 
     /// Writes the project with the owner marker at its root, replacing whatever an earlier compilation left there.

@@ -83,3 +83,10 @@ Feature: What keeps a compilation from its outcomes
     When it is compiled
     Then the snippet "unused" compiled
     And the file of its own is gone
+
+  @regression
+  Scenario: A project folder whose files a CI cache removed, keeping its folders, is replaced
+    Given a compilation in edition 2021 whose project folder an earlier compilation wrote, with every file removed and its folders kept
+    And the snippet "snippets/unused.rs"
+    When it is compiled
+    Then the snippet "unused" compiled

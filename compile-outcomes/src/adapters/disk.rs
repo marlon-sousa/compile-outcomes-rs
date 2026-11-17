@@ -37,7 +37,10 @@ impl Disk for FileSystem {
     fn names_in(&self, folder: &Path) -> Result<Option<BTreeSet<OsString>>, String> {
         match fs::read_dir(folder) {
             Err(error) if error.kind() == ErrorKind::NotFound => Ok(None),
-            listed => listed.and_then(names).map(Some).map_err(reason),
+            listed => listed
+                .and_then(names_holding_files)
+                .map(Some)
+                .map_err(reason),
         }
     }
 
@@ -83,12 +86,36 @@ fn path_of(entry: io::Result<DirEntry>) -> io::Result<PathBuf> {
     Ok(entry?.path())
 }
 
-fn names(entries: ReadDir) -> io::Result<BTreeSet<OsString>> {
-    entries.map(name_of).collect()
+/// The names of the entries that are files or hold one at any depth.
+fn names_holding_files(entries: ReadDir) -> io::Result<BTreeSet<OsString>> {
+    entries.filter_map(name_if_holding_a_file).collect()
 }
 
-fn name_of(entry: io::Result<DirEntry>) -> io::Result<OsString> {
-    Ok(entry?.file_name())
+fn name_if_holding_a_file(entry: io::Result<DirEntry>) -> Option<io::Result<OsString>> {
+    entry.and_then(named_if_holding_a_file).transpose()
+}
+
+fn named_if_holding_a_file(entry: DirEntry) -> io::Result<Option<OsString>> {
+    Ok(holds_a_file(&entry)?.then(|| entry.file_name()))
+}
+
+/// Whether the entry is a file, or a folder holding one at any depth, stopping at the first file found; anything that is not a folder counts as a file.
+fn holds_a_file(entry: &DirEntry) -> io::Result<bool> {
+    if !entry.file_type()?.is_dir() {
+        return Ok(true);
+    }
+    fs::read_dir(entry.path())?
+        .map(entry_holds_a_file)
+        .find(found_or_failed)
+        .unwrap_or(Ok(false))
+}
+
+fn entry_holds_a_file(entry: io::Result<DirEntry>) -> io::Result<bool> {
+    holds_a_file(&entry?)
+}
+
+fn found_or_failed(holds: &io::Result<bool>) -> bool {
+    !matches!(holds, Ok(false))
 }
 
 fn reason(error: io::Error) -> String {
