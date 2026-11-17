@@ -1,6 +1,6 @@
 [package]
 name = "compile-outcomes"
-description = "Compiles Rust snippets and reports what the compiler said about each one, without judging"
+description = "Compiles Rust snippets and reports what the compiler said about each one, without judging, for #[test], Gherkin or any test framework"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -8,7 +8,7 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 readme.workspace = true
-keywords = ["compile-fail", "testing", "diagnostics", "proc-macro", "ui-tests"]
+keywords = ["compile-fail", "testing", "diagnostics", "proc-macro", "gherkin"]
 categories = ["development-tools::testing"]
 
 [lints]

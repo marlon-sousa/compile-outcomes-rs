@@ -1,8 +1,14 @@
 # compile-outcomes
 
-Compiles Rust snippets and reports what the compiler said about each one, without judging.
+Compiles Rust snippets and reports what the compiler said about each one, without judging, for `#[test]`, Gherkin or any test framework.
 
-compile-outcomes is made for test suites that check what a library tells its users when they misuse it, such as the errors of a procedural macro. You give it a set of Rust files, the snippets, and the crates they depend on. It compiles them all in one go with Cargo and gives you, for each snippet, whether it compiled and every error and warning, each with its message, its code and where it points. It asserts nothing: whether a snippet should have compiled, and which message it should show, is for your tests to judge, in whatever framework they use.
+compile-outcomes is made for test suites that check what a library tells its users when they misuse it, such as the errors of a procedural macro. You give it a set of Rust files, the snippets, and the crates they depend on. It compiles them all in one go with Cargo and gives you, for each snippet, whether it compiled and every error and warning, each with its message, its code and where it points. It asserts nothing: whether a snippet should have compiled, and which message it should show, is for your tests to judge, in whatever framework they use: a plain `#[test]`, Gherkin scenarios with the [cucumber](https://crates.io/crates/cucumber) crate, a snapshot tool, or any other.
+
+## Why not trybuild?
+
+[trybuild](https://crates.io/crates/trybuild) is excellent, and it is the right choice when what you want is a snapshot: it compares what the compiler wrote for each test case with a saved `.stderr` file, and rewrites the paths and details that differ between machines so the files stay stable. Much of the Rust ecosystem tests its macros with it.
+
+compile-outcomes answers a different need. It hands your tests what the compiler said, as data: for each snippet, whether it compiled, and each error and warning with its message, its code and the line and column it points at. It judges nothing, so your test framework decides what matters, whether that is one error code, a few words of a message, or the whole text. And since it never compares whole texts, a test that checks codes and locations survives most compiler upgrades.
 
 ## Using it
 
@@ -35,6 +41,77 @@ fn a_struct_without_a_name_is_refused() -> Result<(), Errors> {
     assert_eq!(error.location.as_ref().map(|location| location.line), Some(4));
     Ok(())
 }
+```
+
+### In Gherkin scenarios
+
+Since compile-outcomes only reports, it fits any way of writing tests. With Gherkin, a feature file says what your macros refuse, in words a reader recognises, such as `tests/features/refusals.feature`:
+
+```gherkin
+Feature: What my macros refuse
+
+  Scenario: A user without a name is refused
+    Given the snippet "missing_field"
+    When it is compiled
+    Then it fails with an error that contains "missing field `name`"
+
+  Scenario: A user without an age is refused
+    Given the snippet "missing_age"
+    When it is compiled
+    Then it fails with an error that contains "missing field `age`"
+```
+
+Every snippet of `tests/ui` compiles once, the first time a scenario asks, and each scenario only looks its snippet up, so the scenarios run side by side. The steps, in `tests/ui.rs`:
+
+```rust,ignore
+use std::path::Path;
+use std::sync::LazyLock;
+
+use compile_outcomes::{Compilation, Edition, Outcome, Outcomes, compile};
+use cucumber::{World, given, then, when};
+
+/// Every snippet of tests/ui, compiled once, the first time a scenario asks.
+static OUTCOMES: LazyLock<Outcomes> = LazyLock::new(|| {
+    let work_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("ui");
+    let compilation = Compilation::new(Edition::E2021, work_dir).snippets_in("tests/ui");
+    compile(&compilation).expect("the compilation is well described")
+});
+
+#[derive(Debug, Default, World)]
+struct Ui {
+    snippet: String,
+    outcome: Option<&'static Outcome>,
+}
+
+#[given(expr = "the snippet {string}")]
+fn the_snippet(ui: &mut Ui, name: String) {
+    ui.snippet = name;
+}
+
+#[when("it is compiled")]
+fn it_is_compiled(ui: &mut Ui) {
+    ui.outcome = OUTCOMES.get(&ui.snippet);
+}
+
+#[then(expr = "it fails with an error that contains {string}")]
+fn fails_with(ui: &mut Ui, words: String) {
+    let outcome = ui.outcome.expect("the snippet is in tests/ui");
+    assert!(outcome.is_failed(), "{outcome:#?}");
+    let said = outcome.errors().iter().any(|error| error.message.contains(&words));
+    assert!(said, "{outcome:#?}");
+}
+
+fn main() {
+    futures::executor::block_on(Ui::run("tests/features"));
+}
+```
+
+The scenarios run as a test of their own, without the default test harness, with `cucumber` and `futures` among the development dependencies:
+
+```toml
+[[test]]
+name = "ui"
+harness = false
 ```
 
 ### Describing a compilation
