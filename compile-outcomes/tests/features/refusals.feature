@@ -63,3 +63,22 @@ Feature: What keeps a compilation from its outcomes
       The project could not be written at
       """
     And the compilation is refused with 1 problem
+
+  Scenario: A project folder compile-outcomes did not write is left untouched
+    Given a compilation in edition 2021 whose project folder holds a file of its own
+    And the snippet "snippets/unused.rs"
+    When it is compiled
+    Then the compilation is refused with:
+      """
+      The folder
+      """
+    And the compilation is refused with 1 problem
+    And the file of its own is still there
+
+  Scenario: A project folder handed over to compile-outcomes is replaced
+    Given a compilation in edition 2021 whose project folder holds a file of its own
+    And the project folder is handed over to compile-outcomes
+    And the snippet "snippets/unused.rs"
+    When it is compiled
+    Then the snippet "unused" compiled
+    And the file of its own is gone

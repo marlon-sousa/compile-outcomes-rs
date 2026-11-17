@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use tempfile::TempDir;
 
 use super::FileSystem;
-use crate::domain::{Edition, Error, Package, Project, Resolver};
+use crate::domain::{Edition, Error, OWNER_MARKER, Package, Project, ProjectFolder, Resolver};
 use crate::ports::Disk;
 
 fn project(root: &Path, lockfile: Option<PathBuf>) -> Project {
@@ -76,6 +76,7 @@ fn the_project_replaces_what_an_earlier_one_left() {
     let root = fs::read_to_string(folder.path().join("project/Cargo.toml")).unwrap();
     assert!(root.contains("snippet_a"), "{root}");
     assert!(folder.path().join("project/snippet_a/Cargo.toml").is_file());
+    assert!(folder.path().join("project").join(OWNER_MARKER).is_file());
     assert!(!folder.path().join("project/Cargo.lock").exists());
 }
 
@@ -105,4 +106,25 @@ fn a_lockfile_that_cannot_be_copied_names_the_copy() {
 
     let copy = folder.path().join("project/Cargo.lock");
     assert!(matches!(error, Error::Unwritable { path, .. } if path == copy));
+}
+
+#[test]
+fn a_project_folder_is_missing_empty_owned_or_foreign() {
+    let folder = TempDir::new().unwrap();
+    let root = folder.path().join("project");
+    let cases: [(&[&str], ProjectFolder); 3] = [
+        (&[], ProjectFolder::Empty),
+        (&["notes.txt"], ProjectFolder::Foreign),
+        (&["notes.txt", OWNER_MARKER], ProjectFolder::Owned),
+    ];
+
+    assert_eq!(FileSystem.project_folder(&root), Ok(ProjectFolder::Missing));
+    for (files, expected) in cases {
+        fs::create_dir_all(&root).unwrap();
+        for file in files {
+            fs::write(root.join(file), "").unwrap();
+        }
+        assert_eq!(FileSystem.project_folder(&root), Ok(expected), "{files:?}");
+        fs::remove_dir_all(&root).unwrap();
+    }
 }

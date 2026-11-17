@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use thiserror::Error;
 
-use crate::domain::{Diagnostic, SnippetName};
+use crate::domain::{Diagnostic, OWNER_MARKER, SnippetName};
 
 pub use gathered::Errors;
 
@@ -85,6 +85,17 @@ pub enum Error {
         path: PathBuf,
         /// The reason the system gave.
         reason: String,
+    },
+
+    /// The folder where the project would be written holds files compile-outcomes did not write.
+    #[error(
+        "The folder {} holds files compile-outcomes did not write, so it was left untouched. Give the compilation another work folder, or create an empty file named {OWNER_MARKER} in that folder to let compile-outcomes replace it.",
+        .folder.display()
+    )]
+    #[non_exhaustive]
+    ForeignProjectFolder {
+        /// The folder.
+        folder: PathBuf,
     },
 
     /// Cargo could not be started.

@@ -26,7 +26,7 @@ compile-outcomes does input and output, so it has ports: a port is a trait the s
 1. `lib.rs` re-exports the model and defines `compile`, which hands the compilation to the service with the real adapters.
 2. The service, `use_cases/compile.rs`, asks the disk port for the snippet files the compilation names, and the naming policy for the snippets they make. It gathers every problem with the description before going on.
 3. The project policy makes the `Project` that compiles those snippets: one package per snippet, with the compilation's edition and dependencies.
-4. The disk port writes the project, and the Cargo port builds it and returns the `BuildReport`: every compiler message with the crate it is about, every crate built, and what Cargo wrote to its error output.
+4. The disk port says what is at the project's root, and the service refuses a folder holding files compile-outcomes did not write. Otherwise the disk port writes the project, and the Cargo port builds it and returns the `BuildReport`: every compiler message with the crate it is about, every crate built, and what Cargo wrote to its error output.
 5. The outcomes policy turns the report into the `Outcomes`, or into the errors that kept the compilation from them.
 
 ## Module roles

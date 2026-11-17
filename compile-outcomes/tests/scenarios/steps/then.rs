@@ -6,7 +6,7 @@ use compile_outcomes::{Diagnostic, Errors, Location, Outcome, Outcomes};
 use cucumber::gherkin::Step;
 use cucumber::then;
 
-use super::{Compiling, fixture, work_dir};
+use super::{Compiling, file_of_its_own, fixture, work_dir};
 
 impl Compiling {
     fn outcomes(&self) -> &Outcomes {
@@ -164,4 +164,14 @@ fn the_lockfile_version(_world: &mut Compiling, version: u8) {
 fn left_as_it_was(_world: &mut Compiling) {
     let text = fs::read_to_string(fixture("lockfile.lock")).unwrap();
     assert_eq!(text, include_str!("../../fixtures/lockfile.lock"));
+}
+
+#[then("the file of its own is still there")]
+fn still_there(_world: &mut Compiling) {
+    assert_eq!(fs::read_to_string(file_of_its_own()).unwrap(), "mine");
+}
+
+#[then("the file of its own is gone")]
+fn gone(_world: &mut Compiling) {
+    assert!(!file_of_its_own().exists());
 }

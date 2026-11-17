@@ -5,7 +5,7 @@ use std::fs;
 use compile_outcomes::{Compilation, Dependency, Edition};
 use cucumber::given;
 
-use super::{Compiling, fixture, work_dir};
+use super::{Compiling, file_of_its_own, fixture, foreign_work_dir, work_dir};
 
 fn edition(year: u16) -> Edition {
     match year {
@@ -38,6 +38,23 @@ fn a_compilation_in_a_file(world: &mut Compiling, year: u16) {
     let file = work_dir().with_extension("file");
     fs::write(&file, "").unwrap();
     world.compilation = Some(Compilation::new(edition(year), file));
+}
+
+#[given(expr = "a compilation in edition {int} whose project folder holds a file of its own")]
+fn a_compilation_with_a_foreign_project(world: &mut Compiling, year: u16) {
+    let folder = foreign_work_dir();
+    if folder.exists() {
+        fs::remove_dir_all(&folder).unwrap();
+    }
+    fs::create_dir_all(folder.join("project")).unwrap();
+    fs::write(file_of_its_own(), "mine").unwrap();
+    world.compilation = Some(Compilation::new(edition(year), folder));
+}
+
+#[given("the project folder is handed over to compile-outcomes")]
+fn handed_over(_world: &mut Compiling) {
+    let marker = foreign_work_dir().join("project/.owned-by-compile-outcomes");
+    fs::write(marker, "").unwrap();
 }
 
 #[given(expr = "the snippet {string}")]

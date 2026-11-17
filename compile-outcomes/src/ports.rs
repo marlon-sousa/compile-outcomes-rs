@@ -3,7 +3,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use crate::domain::{BuildReport, Error, Project};
+use crate::domain::{BuildReport, Error, Project, ProjectFolder};
 
 /// The disk: the snippet files and folders a compilation names, and the project it writes.
 pub(crate) trait Disk {
@@ -13,7 +13,10 @@ pub(crate) trait Disk {
     /// Every file of `folder`, not looking into subfolders, or the reason the system gave.
     fn files_in(&self, folder: &Path) -> Result<BTreeSet<PathBuf>, String>;
 
-    /// Writes the project, replacing whatever an earlier compilation left at its root.
+    /// What is at `root` now, or the error naming it when it cannot be read.
+    fn project_folder(&self, root: &Path) -> Result<ProjectFolder, Error>;
+
+    /// Writes the project with the owner marker at its root, replacing whatever an earlier compilation left there.
     fn write(&self, project: &Project) -> Result<(), Error>;
 }
 
