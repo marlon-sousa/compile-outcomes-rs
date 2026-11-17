@@ -2,6 +2,7 @@
 
 use std::borrow::Borrow;
 
+use delegate::delegate;
 use derive_more::Display;
 
 /// The name of a snippet: its file's name without the extension.
@@ -19,7 +20,7 @@ impl SnippetName {
             .map(Self)
     }
 
-    delegate::delegate! {
+    delegate! {
         to self.0 {
             /// The name, as a snippet's file gives it.
             pub fn as_str(&self) -> &str;
@@ -32,8 +33,11 @@ impl SnippetName {
 }
 
 impl Borrow<str> for SnippetName {
-    fn borrow(&self) -> &str {
-        &self.0
+    delegate! {
+        to self.0 {
+            #[call(as_str)]
+            fn borrow(&self) -> &str;
+        }
     }
 }
 
