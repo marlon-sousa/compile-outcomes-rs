@@ -1,2 +1,97 @@
-# compile-outcomes-rs
+# compile-outcomes
+
 Compiles Rust snippets and reports what the compiler said about each one, without judging.
+
+compile-outcomes is made for test suites that check what a library tells its users when they misuse it, such as the errors of a procedural macro. You give it a set of Rust files, the snippets, and the crates they depend on. It compiles them all in one go with Cargo and gives you, for each snippet, whether it compiled and every error and warning, each with its message, its code and where it points. It asserts nothing: whether a snippet should have compiled, and which message it should show, is for your tests to judge, in whatever framework they use.
+
+## Using it
+
+Add it to the development dependencies of the crate whose tests use it:
+
+```toml
+[dev-dependencies]
+compile-outcomes = "0.1"
+```
+
+Then describe a compilation, compile it, and look at the outcomes:
+
+```rust,no_run
+use compile_outcomes::{Compilation, Dependency, Edition, Errors, compile};
+
+#[test]
+fn a_struct_without_a_name_is_refused() -> Result<(), Errors> {
+    let work_dir = std::path::Path::new(env!("CARGO_TARGET_TMPDIR")).join("missing_field");
+    let compilation = Compilation::new(Edition::E2021, work_dir)
+        .snippets_in("tests/ui")
+        .dependency(Dependency::path("my_macros", "."));
+
+    let outcomes = compile(&compilation)?;
+
+    let outcome = outcomes.get("missing_field").expect("tests/ui/missing_field.rs");
+    assert!(outcome.is_failed());
+    let error = &outcome.errors()[0];
+    assert_eq!(error.message, "missing field `name` in initializer of `User`");
+    assert_eq!(error.code.as_deref(), Some("E0063"));
+    assert_eq!(error.location.as_ref().map(|location| location.line), Some(4));
+    Ok(())
+}
+```
+
+### Describing a compilation
+
+- `Compilation::new(edition, work_dir)` starts one. `work_dir` is a folder compile-outcomes owns: it writes the project there and keeps the build output between compilations, so the dependencies compile once. A folder under your `target/` suits it, such as one in the `CARGO_TARGET_TMPDIR` Cargo gives integration tests. Two compilations must not share it at the same time, and tests run in parallel, so give each test that compiles its own.
+- `.snippet(path)` adds one snippet, and `.snippets_in(dir)` every `.rs` file of a folder, not looking into subfolders.
+- `.dependency(Dependency::path(name, path))` or `.dependency(Dependency::version(name, "1.0"))` gives every snippet a dependency, with `.features([...])` and `.without_default_features()` when needed.
+- `.lockfile("Cargo.lock")` makes the dependencies resolve to the versions your own lockfile holds. It is copied, never written.
+
+A relative path is taken from the current folder, which for a test is its crate's folder.
+
+Describing a compilation touches nothing on disk; only `compile` does.
+
+### Snippets
+
+Each snippet is the root of its own library crate, so it needs no `main`. It is named after its file: `tests/ui/missing_field.rs` is the snippet `missing_field`, whose crate is `snippet_missing_field`. A name is made of ASCII letters, digits, `_` and `-`, and does not start with a digit.
+
+### Outcomes
+
+`compile` returns the `Outcomes`, one `Outcome` for each snippet, looked up with `.get(name)` or iterated in the order of the names:
+
+- `Outcome::Compiled { warnings }` when Cargo produced the snippet's crate;
+- `Outcome::Failed { errors, warnings }` when the compiler reported errors for it.
+
+Each `Diagnostic` has its `message`, the first line; its `code`, such as `E0425` or `dead_code`; its `location`, the file, line and column it points at; and `rendered`, the whole message as a terminal shows it. A snippet that fails to compile is an outcome, never an error.
+
+### Errors
+
+`compile` returns `Errors` when something kept it from the outcomes. Every problem with the description, such as a snippet whose name is not valid or two snippets of the same name, is reported together. A problem while compiling, such as a dependency that fails to compile or Cargo that cannot be started, stops the compilation and is reported alone. Each error is a sentence naming what it is about, and `Errors` displays as those sentences, each starting on a line of its own.
+
+### Which Cargo runs
+
+compile-outcomes runs the `cargo` the `CARGO` environment variable names, which Cargo sets for the tests it runs, so your snippets compile with the same toolchain as your tests. Otherwise it runs the `cargo` on the `PATH`. Cargo works as configured for you: its network access, registries and environment variables apply.
+
+### What 0.1.0 does not do yet
+
+Snippets compiled as binaries or tests, dependencies by git URL or for only some snippets, choosing the target, the profile or extra `rustc` flags, and a time limit are not part of 0.1.0. [docs/SPEC.md](docs/SPEC.md) describes exactly what it does.
+
+The minimum supported Rust version is 1.85.
+
+## Contributing
+
+compile-outcomes is built in small, stacked pull requests, each reviewed against written rules:
+
+- [docs/SPEC.md](docs/SPEC.md) says what compile-outcomes does, accepts and refuses. A change to what it does starts there.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) says how the code is organised and written: a pure domain that decides, and adapters at the edges that write files and run Cargo.
+- [docs/WORKFLOW.md](docs/WORKFLOW.md) says how a change travels to `main`, what each check does, and how a release is made.
+- [AGENTS.md](AGENTS.md) holds the rules every change follows and how it is reviewed, for people and agents alike.
+
+Before pushing, run the quality gate from the repository's root:
+
+```sh
+cargo xtask ci
+```
+
+It checks formatting, clippy with every warning an error, the architecture, every unit test and Gherkin scenario, the documentation, the dependencies with cargo-deny, and a publish dry run.
+
+## Licence
+
+Licensed under either the [Apache License, Version 2.0](LICENSE-APACHE) or the [MIT licence](LICENSE-MIT), at your option.
