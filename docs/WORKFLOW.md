@@ -18,7 +18,7 @@ How a change to compile-outcomes travels from an issue to `main`. [AGENTS.md](..
 
 ## 3. Branches and commits
 
-- **Branches** are named `stack/<number>-<what it does>` for a layer of a stack, such as `stack/02-the-model`, and `<label of its issue>/<what it does>` for a pull request of its own, such as `process/issues-first`.
+- **Branches** are named `stack/<number>-<what it does>`, such as `stack/02-the-model`.
 - **Commit messages** follow [Conventional Commits](https://www.conventionalcommits.org/), such as `feat(outcomes): keep the order the compiler gave the diagnostics`.
 - **Commit types:** `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert` or `test`; a formatting-only change is a `refactor`.
 - **Changelog entries:** a `feat`, a `fix` or a breaking change (`!` before the colon) ends with at least one trailer, `Added:`, `Changed:`, `Fixed:` or `Removed:`, each a one-line entry of the changelog as a user reads it, or with `Changelog: none` when a user meets no change. For example:
@@ -33,7 +33,7 @@ How a change to compile-outcomes travels from an issue to `main`. [AGENTS.md](..
 
 ### Naming the issue
 
-Every pull request names an open issue of this repository, as section 10 says: `Closes #N` when it finishes the issue, `Refs #N` when it does part of it. The layers of a stack each say `Refs #N`, and the top one says `Closes #N`. A pull request never closes an issue of another repository, which GitHub would close the moment it merged, before that repository's own work.
+Every pull request names an open issue of this repository, as section 10 says: `Closes #N` when it finishes the issue, `Refs #N` when it does part of it. The layers of a stack each say `Refs #N`, and the top one also says `Closes #N` once it targets `main`: GitHub links a closing keyword only on a pull request into the default branch, so before that the check finds only `Refs #N`. A pull request never closes an issue of another repository, which GitHub would close the moment it merged, before that repository's own work.
 
 ## 4. Stacked pull requests
 
