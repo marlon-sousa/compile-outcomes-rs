@@ -66,7 +66,8 @@ A relative path, whether of a snippet, a folder, a dependency, the lockfile or t
    - `rendered`, the whole message as a terminal shows it.
 4. **Errors are the messages of level error**, an internal compiler error included; **warnings are those of level warning**. The compiler's closing notes, such as "For more information about an error, try `rustc --explain`", are neither, and are left out.
 5. **Diagnostics keep the order the compiler gave them.**
-6. **Diagnostics are as the compiler gave them.** Beyond keeping the first line of `message`, compile-outcomes rewrites nothing in them: a path keeps the separators of the platform, and the words are those of the compiler that ran, which change from one Rust version to the next.
+6. **A `Diagnostic` displays as its `rendered`, and an `Outcome` as every error's `rendered`, then every warning's**, with nothing added: the compiler's own text, for a failure message, or to compare with a saved file. That text changes with the compiler that ran and differs between platforms, so an assertion that lasts checks the fields instead. A terminal shows errors and warnings interleaved by where they point; an `Outcome` displays its errors first.
+7. **Diagnostics are as the compiler gave them.** Beyond keeping the first line of `message`, compile-outcomes rewrites nothing in them: a path keeps the separators of the platform, and the words are those of the compiler that ran, which change from one Rust version to the next.
 
 ## 6. Errors
 

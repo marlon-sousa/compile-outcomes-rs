@@ -32,12 +32,12 @@ fn it_is_compiled(ui: &mut Ui) {
 #[then(expr = "it fails with an error that contains {string}")]
 fn fails_with(ui: &mut Ui, words: String) {
     let outcome = ui.outcome.expect("the snippet is in tests/ui");
-    assert!(outcome.is_failed(), "{outcome:#?}");
+    assert!(outcome.is_failed(), "{outcome}");
     let said = outcome
         .errors()
         .iter()
         .any(|error| error.message.contains(&words));
-    assert!(said, "{outcome:#?}");
+    assert!(said, "{outcome}");
 }
 
 fn main() {

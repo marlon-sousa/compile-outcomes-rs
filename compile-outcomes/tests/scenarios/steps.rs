@@ -1,5 +1,6 @@
 //! The steps of the scenarios, and the compilation they describe.
 
+mod display;
 mod folders;
 mod given;
 mod then;

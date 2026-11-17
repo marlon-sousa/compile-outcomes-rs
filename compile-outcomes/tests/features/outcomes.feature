@@ -38,6 +38,12 @@ Feature: What the compiler said about each snippet
       cannot find function `second_missing` in this scope
       """
 
+  Scenario: An outcome displays as the compiler rendered its errors, then its warnings
+    Given the snippet "snippets/warned_and_failed.rs"
+    When it is compiled
+    Then the snippet "warned_and_failed" failed
+    And the snippet "warned_and_failed" displays every error the compiler rendered, starting "error[E0308]: mismatched types", then every warning, starting "warning: unused import: `std::fmt`"
+
   Scenario: Every snippet of a folder has its own outcome, whatever the others did
     Given the snippets in "folder"
     When it is compiled

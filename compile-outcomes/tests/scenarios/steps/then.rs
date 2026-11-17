@@ -24,7 +24,7 @@ impl Compiling {
         }
     }
 
-    fn outcome(&self, snippet: &str) -> &Outcome {
+    pub(super) fn outcome(&self, snippet: &str) -> &Outcome {
         self.outcomes()
             .get(snippet)
             .unwrap_or_else(|| panic!("no outcome for {snippet}"))

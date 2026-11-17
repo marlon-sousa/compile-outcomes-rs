@@ -2,8 +2,13 @@
 
 use std::path::PathBuf;
 
+use derive_more::Display;
+
 /// One message of the compiler about a snippet: an error or a warning.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+///
+/// It displays as [`rendered`](Self::rendered), the compiler's own text, which changes with the compiler that ran and holds the platform's paths; assertions that last check the other fields.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Display)]
+#[display("{rendered}")]
 #[non_exhaustive]
 pub struct Diagnostic {
     /// The first line of the message, such as ``cannot find function `shout` in crate `greeting` ``.

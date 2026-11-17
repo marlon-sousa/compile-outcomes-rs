@@ -109,12 +109,12 @@ fn it_is_compiled(ui: &mut Ui) {
 #[then(expr = "it fails with an error that contains {string}")]
 fn fails_with(ui: &mut Ui, words: String) {
     let outcome = ui.outcome.expect("the snippet is in tests/ui");
-    assert!(outcome.is_failed(), "{outcome:#?}");
+    assert!(outcome.is_failed(), "{outcome}");
     let said = outcome
         .errors()
         .iter()
         .any(|error| error.message.contains(&words));
-    assert!(said, "{outcome:#?}");
+    assert!(said, "{outcome}");
 }
 
 fn main() {
@@ -156,6 +156,8 @@ Each snippet is the root of its own library crate, so it needs no `main`. It is 
 
 Each `Diagnostic` has its `message`, the first line; its `code`, such as `E0425` or `dead_code`; its `location`, the file, line and column it points at; and `rendered`, the whole message as a terminal shows it. A snippet that fails to compile is an outcome, never an error.
 
+An `Outcome` displays as the compiler printed its errors, then its warnings, each diagnostic as its `rendered`. Use it in a failure message, as `assert!(outcome.is_failed(), "{outcome}")`, or compare it with a saved file if you accept updating that file whenever the compiler or the platform changes; assertions that last check the fields.
+
 ### Errors
 
 `compile` returns `Errors` when something kept it from the outcomes. Every problem with the description, such as a snippet whose name is not valid or two snippets of the same name, is reported together. A problem while compiling, such as a dependency that fails to compile or Cargo that cannot be started, stops the compilation and is reported alone. Each error is a sentence naming what it is about, and `Errors` displays as those sentences, each starting on a line of its own.
@@ -170,7 +172,7 @@ compile-outcomes works the same on Linux, macOS and Windows, and its tests run o
 
 ### Compiler versions
 
-Compiler messages change from one Rust version to the next, and compile-outcomes reports them as they are. A diagnostic's `code`, such as `E0425`, and its `line` and `column` rarely change; its `message`, one line, sometimes does; and `rendered`, the whole block, changes most often. A suite that checks codes and locations, and messages only where they matter, survives most upgrades; one that compares `rendered` runs best on one pinned toolchain.
+Compiler messages change from one Rust version to the next, and compile-outcomes reports them as they are. A diagnostic's `code`, such as `E0425`, and its `line` and `column` rarely change; its `message`, one line, sometimes does; and `rendered`, the whole block, changes most often. A suite that checks codes and locations, and messages only where they matter, survives most upgrades; one that compares `rendered`, or an outcome's display, runs best on one pinned toolchain.
 
 ### What 0.1.0 does not do yet
 
