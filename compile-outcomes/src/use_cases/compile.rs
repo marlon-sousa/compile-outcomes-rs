@@ -23,6 +23,12 @@ pub(crate) fn compile(
         .and_then(|lockfile| unreadable_lockfile(lockfile, disk));
     let snippets = described(naming::snippets(found), lockfile)?;
     let project = project::project(compilation, &snippets);
+    if disk.project_folder(&project.root)?.is_foreign() {
+        return Err(Error::ForeignProjectFolder {
+            folder: project.root,
+        }
+        .into());
+    }
     disk.write(&project)?;
     let report = cargo.build(&project)?;
     Ok(outcomes::outcomes(&snippets, report)?)

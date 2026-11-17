@@ -4,11 +4,12 @@ mod manifest;
 
 use std::collections::BTreeSet;
 use std::env;
+use std::ffi::{OsStr, OsString};
 use std::fs::{self, DirEntry};
 use std::io::{self, ErrorKind};
 use std::path::{Path, PathBuf};
 
-use crate::domain::{Error, Project};
+use crate::domain::{Error, OWNER_MARKER, Project, ProjectFolder};
 use crate::ports::Disk;
 
 /// The disk of the machine compile-outcomes runs on.
@@ -33,9 +34,26 @@ impl Disk for FileSystem {
         Ok(files)
     }
 
+    fn project_folder(&self, root: &Path) -> Result<ProjectFolder, Error> {
+        let names: BTreeSet<OsString> = match fs::read_dir(root) {
+            Err(error) if error.kind() == ErrorKind::NotFound => return Ok(ProjectFolder::Missing),
+            listed => listed
+                .and_then(|entries| entries.map(name_of).collect())
+                .map_err(|error| unwritable(root, &error))?,
+        };
+        Ok(if names.is_empty() {
+            ProjectFolder::Empty
+        } else if names.contains(OsStr::new(OWNER_MARKER)) {
+            ProjectFolder::Owned
+        } else {
+            ProjectFolder::Foreign
+        })
+    }
+
     fn write(&self, project: &Project) -> Result<(), Error> {
         let base = env::current_dir().map_err(|error| unwritable(&project.root, &error))?;
         replace_folder(&project.root)?;
+        write_file(&project.root.join(OWNER_MARKER), "")?;
         write_file(
             &project.root.join("Cargo.toml"),
             &manifest::workspace(project),
@@ -72,6 +90,10 @@ fn write_file(file: &Path, contents: &str) -> Result<(), Error> {
 
 fn path_of(entry: io::Result<DirEntry>) -> io::Result<PathBuf> {
     Ok(entry?.path())
+}
+
+fn name_of(entry: io::Result<DirEntry>) -> io::Result<OsString> {
+    Ok(entry?.file_name())
 }
 
 fn reason(error: io::Error) -> String {

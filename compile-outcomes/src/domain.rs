@@ -9,6 +9,7 @@ mod errors;
 mod found;
 mod outcomes;
 mod project;
+mod project_folder;
 mod snippet;
 mod snippet_name;
 
@@ -23,5 +24,6 @@ pub use errors::{Error, Errors};
 pub(crate) use found::Found;
 pub use outcomes::{Outcome, Outcomes};
 pub(crate) use project::{Package, Project, Resolver};
+pub(crate) use project_folder::{OWNER_MARKER, ProjectFolder};
 pub(crate) use snippet::Snippet;
 pub use snippet_name::SnippetName;

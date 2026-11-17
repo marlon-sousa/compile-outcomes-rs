@@ -1,69 +1,11 @@
-use std::cell::RefCell;
+mod fakes;
+
 use std::collections::BTreeSet;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use super::compile;
-use crate::domain::{BuildReport, Compilation, Edition, Error, Outcome, Project};
-use crate::ports::{Cargo, Disk};
-
-/// A disk whose files and folders are given, and which records each project it writes.
-#[derive(Default)]
-struct FakeDisk {
-    unreadable: Vec<PathBuf>,
-    folder: BTreeSet<PathBuf>,
-    refuses_writing: bool,
-    written: RefCell<Vec<Project>>,
-}
-
-impl Disk for FakeDisk {
-    fn readable(&self, file: &Path) -> Result<(), String> {
-        if self.unreadable.iter().any(|unreadable| unreadable == file) {
-            Err("gone".to_owned())
-        } else {
-            Ok(())
-        }
-    }
-
-    fn files_in(&self, _folder: &Path) -> Result<BTreeSet<PathBuf>, String> {
-        Ok(self.folder.clone())
-    }
-
-    fn write(&self, project: &Project) -> Result<(), Error> {
-        if self.refuses_writing {
-            return Err(Error::Unwritable {
-                path: project.root.clone(),
-                reason: "read-only".to_owned(),
-            });
-        }
-        self.written.borrow_mut().push(project.clone());
-        Ok(())
-    }
-}
-
-/// Cargo that reports the given crates built, or cannot be started, and records each project it builds.
-#[derive(Default)]
-struct FakeCargo {
-    built: Vec<String>,
-    missing: bool,
-    builds: RefCell<Vec<Project>>,
-}
-
-impl Cargo for FakeCargo {
-    fn build(&self, project: &Project) -> Result<BuildReport, Error> {
-        self.builds.borrow_mut().push(project.clone());
-        if self.missing {
-            return Err(Error::CargoNotStarted {
-                program: PathBuf::from("cargo"),
-                reason: "No such file or directory".to_owned(),
-            });
-        }
-        Ok(BuildReport {
-            built: self.built.clone(),
-            messages: Vec::new(),
-            error_output: String::new(),
-        })
-    }
-}
+use crate::domain::{Compilation, Edition, Error, Outcome};
+use fakes::{FakeCargo, FakeDisk};
 
 fn compilation() -> Compilation {
     Compilation::new(Edition::E2021, "work")
@@ -184,4 +126,24 @@ fn a_lockfile_that_cannot_be_read_is_a_problem_with_the_description() {
         }]
     );
     assert!(disk.written.borrow().is_empty());
+}
+
+#[test]
+fn a_project_folder_compile_outcomes_did_not_write_is_left_untouched() {
+    let disk = FakeDisk {
+        foreign: true,
+        ..FakeDisk::default()
+    };
+    let cargo = FakeCargo::default();
+
+    let errors = compile(&compilation(), &disk, &cargo).unwrap_err();
+
+    assert_eq!(
+        errors.into_iter().collect::<Vec<_>>(),
+        [Error::ForeignProjectFolder {
+            folder: PathBuf::from("work/project")
+        }]
+    );
+    assert!(disk.written.borrow().is_empty());
+    assert!(cargo.builds.borrow().is_empty());
 }
