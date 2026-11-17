@@ -7,6 +7,7 @@ fn ci_or_no_mode_runs_every_mode_in_order() {
         Mode::Fmt,
         Mode::Clippy,
         Mode::Arch,
+        Mode::Readme,
         Mode::Test,
         Mode::Doc,
         Mode::Deny,
@@ -30,7 +31,9 @@ fn an_unknown_mode_is_refused() {
 fn modes_are_named_as_typed() {
     assert_eq!(
         Mode::VARIANTS,
-        ["fmt", "clippy", "arch", "test", "doc", "deny", "package"]
+        [
+            "fmt", "clippy", "arch", "readme", "test", "doc", "deny", "package"
+        ]
     );
     assert_eq!(Mode::Package.to_string(), "package");
 }

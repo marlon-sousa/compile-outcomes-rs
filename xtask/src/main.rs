@@ -2,9 +2,11 @@
 
 mod architecture;
 mod modes;
+mod readme;
 mod run;
 
 use std::env;
+use std::path::Path;
 use std::process::ExitCode;
 
 use modes::{Mode, Step, requested, step};
@@ -40,6 +42,7 @@ fn passes(step: Step) -> bool {
         Step::Cargo(arguments) => run::cargo(arguments),
         Step::Rustdoc(arguments) => run::rustdoc(arguments),
         Step::Architecture => architecture_holds(),
+        Step::Readme => readme_holds(),
     }
 }
 
@@ -51,4 +54,24 @@ fn architecture_holds() -> bool {
         .collect();
     breaches.iter().for_each(|breach| eprintln!("{breach}"));
     breaches.is_empty()
+}
+
+fn readme_holds() -> bool {
+    println!("\n>>> README examples check");
+    let breaches: Vec<String> = match run::text(Path::new("README.md")) {
+        Ok(readme) => readme::examples(&readme)
+            .into_iter()
+            .filter_map(example_breach)
+            .collect(),
+        Err(reason) => vec![format!("The README could not be read: {reason}")],
+    };
+    breaches.iter().for_each(|breach| eprintln!("{breach}"));
+    breaches.is_empty()
+}
+
+fn example_breach(example: Result<readme::Example, String>) -> Option<String> {
+    match example {
+        Ok(example) => readme::breach(&example, run::text(&example.file)),
+        Err(breach) => Some(breach),
+    }
 }

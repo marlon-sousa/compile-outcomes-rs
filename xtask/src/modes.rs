@@ -11,6 +11,7 @@ pub(crate) enum Mode {
     Fmt,
     Clippy,
     Arch,
+    Readme,
     Test,
     Doc,
     Deny,
@@ -26,6 +27,8 @@ pub(crate) enum Step {
     Rustdoc(&'static [&'static str]),
     /// The architecture check.
     Architecture,
+    /// The check that the README's marked examples are what their files hold.
+    Readme,
 }
 
 /// The modes `argument` names: every mode for `ci` or for none, otherwise the one of that name.
@@ -54,6 +57,7 @@ pub(crate) fn step(mode: Mode) -> Step {
             "warnings",
         ]),
         Mode::Arch => Step::Architecture,
+        Mode::Readme => Step::Readme,
         Mode::Test => Step::Cargo(&["test", "--workspace", "--all-targets", "--locked"]),
         Mode::Doc => Step::Rustdoc(&["doc", "--workspace", "--no-deps", "--locked"]),
         Mode::Deny => Step::Cargo(&["deny", "check"]),

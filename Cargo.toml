@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "compile-outcomes",
+    "examples/my_macros",
     "xtask",
 ]
 # Crates the scenarios compile snippets against, each a workspace of its own.

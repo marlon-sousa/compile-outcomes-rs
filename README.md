@@ -21,6 +21,7 @@ compile-outcomes = "0.1"
 
 Then describe a compilation, compile it, and look at the outcomes:
 
+<!-- example: examples/my_macros/tests/missing_field.rs -->
 ```rust,no_run
 use compile_outcomes::{Compilation, Dependency, Edition, Errors, compile};
 
@@ -33,12 +34,20 @@ fn a_struct_without_a_name_is_refused() -> Result<(), Errors> {
 
     let outcomes = compile(&compilation)?;
 
-    let outcome = outcomes.get("missing_field").expect("tests/ui/missing_field.rs");
+    let outcome = outcomes
+        .get("missing_field")
+        .expect("tests/ui/missing_field.rs");
     assert!(outcome.is_failed());
     let error = &outcome.errors()[0];
-    assert_eq!(error.message, "missing field `name` in initializer of `User`");
+    assert_eq!(
+        error.message,
+        "missing field `name` in initializer of `User`"
+    );
     assert_eq!(error.code.as_deref(), Some("E0063"));
-    assert_eq!(error.location.as_ref().map(|location| location.line), Some(4));
+    assert_eq!(
+        error.location.as_ref().map(|location| location.line),
+        Some(4)
+    );
     Ok(())
 }
 ```
@@ -47,6 +56,7 @@ fn a_struct_without_a_name_is_refused() -> Result<(), Errors> {
 
 Since compile-outcomes only reports, it fits any way of writing tests. With Gherkin, a feature file says what your macros refuse, in words a reader recognises, such as `tests/features/refusals.feature`:
 
+<!-- example: examples/my_macros/tests/features/refusals.feature -->
 ```gherkin
 Feature: What my macros refuse
 
@@ -63,6 +73,7 @@ Feature: What my macros refuse
 
 Every snippet of `tests/ui` compiles once, the first time a scenario asks, and each scenario only looks its snippet up, so the scenarios run side by side. The steps, in `tests/ui.rs`:
 
+<!-- example: examples/my_macros/tests/ui.rs -->
 ```rust,ignore
 use std::path::Path;
 use std::sync::LazyLock;
@@ -99,7 +110,10 @@ fn it_is_compiled(ui: &mut Ui) {
 fn fails_with(ui: &mut Ui, words: String) {
     let outcome = ui.outcome.expect("the snippet is in tests/ui");
     assert!(outcome.is_failed(), "{outcome:#?}");
-    let said = outcome.errors().iter().any(|error| error.message.contains(&words));
+    let said = outcome
+        .errors()
+        .iter()
+        .any(|error| error.message.contains(&words));
     assert!(said, "{outcome:#?}");
 }
 
@@ -110,6 +124,7 @@ fn main() {
 
 The scenarios run as a test of their own, without the default test harness, with `cucumber` and `futures` among the development dependencies:
 
+<!-- example: examples/my_macros/Cargo.toml -->
 ```toml
 [[test]]
 name = "ui"

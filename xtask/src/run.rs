@@ -1,10 +1,11 @@
-//! Adapter: runs Cargo from the workspace's root, and reads the files the architecture check reads.
+//! Adapter: runs Cargo from the workspace's root, and reads the files the architecture and README checks read.
 
 mod sources;
 
 use std::env;
 use std::ffi::OsString;
-use std::path::PathBuf;
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 pub(crate) use sources::read as sources;
@@ -12,6 +13,11 @@ pub(crate) use sources::read as sources;
 /// The workspace's root, wherever the gate is started from.
 pub(crate) fn root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..")
+}
+
+/// The text of the file at `path`, from the workspace's root, or the reason the system gave.
+pub(crate) fn text(path: &Path) -> Result<String, String> {
+    fs::read_to_string(root().join(path)).map_err(|error| error.to_string())
 }
 
 /// Runs Cargo with `arguments`, and tells whether it succeeded.

@@ -61,7 +61,8 @@ A pull request is ready to merge when:
 | `fmt` | rustfmt compliance. |
 | `clippy` | clippy with every warning an error. |
 | `arch` | no input or output in `domain/` or `use_cases/`, no `mod.rs`, and files of at most 200 lines. |
-| `test` | every unit test and Gherkin scenario. |
+| `readme` | each code block of README.md marked `<!-- example: <file> -->` is held, as written, by that file of a crate the gate builds, such as `examples/my_macros`, whose tests run in the `test` mode. |
+| `test` | every unit test and Gherkin scenario, the README's examples included. |
 | `doc` | the documentation, with every warning an error. |
 | `deny` | the licences, advisories and sources of the dependencies, as `deny.toml` allows them. It needs cargo-deny, installed with `cargo install cargo-deny --version 0.20.2 --locked`. |
 | `package` | the crate built from its package alone, as crates.io would receive it, with `cargo publish --workspace --dry-run`, in its own target folder. |
