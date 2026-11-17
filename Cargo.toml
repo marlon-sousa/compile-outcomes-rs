@@ -1,0 +1,32 @@
+[workspace]
+resolver = "3"
+members = [
+    "compile-outcomes",
+    "xtask",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85.0"
+license = "MIT OR Apache-2.0"
+authors = ["compile-outcomes contributors"]
+repository = "https://github.com/marlon-sousa/compile-outcomes-rs"
+readme = "README.md"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+todo = "deny"
+unimplemented = "deny"
+
+[workspace.dependencies]
+proc-macro2 = { version = "1.0", features = ["span-locations"] }
+strum = { version = "0.27", features = ["derive"] }
+syn = { version = "2.0", features = ["full", "visit"] }
