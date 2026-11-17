@@ -16,7 +16,7 @@ fn a_new_compilation_has_nothing_but_its_edition_and_folder() {
 }
 
 #[test]
-fn a_clean_build_removes_the_build_output_first() {
+fn clean_build_asks_for_a_clean_build() {
     let compilation = Compilation::new(Edition::E2021, "work").clean_build();
 
     assert_eq!(compilation.build(), Build::Clean);

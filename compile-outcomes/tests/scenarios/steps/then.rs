@@ -1,5 +1,6 @@
 //! The steps that check what a compilation gave.
 
+use std::env;
 use std::fs;
 
 use compile_outcomes::{Diagnostic, Errors, Location, Outcome, Outcomes};
@@ -164,4 +165,19 @@ fn the_lockfile_version(_world: &mut Compiling, version: u8) {
 fn left_as_it_was(_world: &mut Compiling) {
     let text = fs::read_to_string(fixture("lockfile.lock")).unwrap();
     assert_eq!(text, include_str!("../../fixtures/lockfile.lock"));
+}
+
+#[then(
+    expr = "the warning of {string} points at its file as the compiler names it, with the separators of the platform"
+)]
+fn points_at_its_file(world: &mut Compiling, snippet: String) {
+    let warnings = world.outcome(&snippet).warnings();
+    let location = warnings
+        .first()
+        .and_then(|warning| warning.location.as_ref());
+    let file = ["tests", "fixtures", "snippets", &format!("{snippet}.rs")]
+        .iter()
+        .fold(env::current_dir().unwrap(), |path, part| path.join(part));
+    let named = location.map(|location| location.file.display().to_string());
+    assert_eq!(named, Some(file.display().to_string()));
 }

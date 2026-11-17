@@ -98,9 +98,9 @@ pub enum Error {
         folder: PathBuf,
     },
 
-    /// For a clean build, the folder of the build output holds files Cargo did not mark as its own.
+    /// For a clean build, the target folder holds files without the mark Cargo leaves in its build output.
     #[error(
-        "The folder {} holds files Cargo did not mark as its build output, with a file named {CARGO_MARKER}, so it was left untouched. Give the compilation another work folder, or remove that folder yourself.",
+        "The folder {} holds files but no file named {CARGO_MARKER}, the mark Cargo leaves in its build output, so it was left untouched. Give the compilation another work folder, or remove that folder yourself.",
         .folder.display()
     )]
     #[non_exhaustive]
@@ -109,13 +109,13 @@ pub enum Error {
         folder: PathBuf,
     },
 
-    /// For a clean build, the build output could not be removed.
-    #[error("The build output at {} could not be removed: {reason}", .folder.display())]
+    /// For a clean build, the target folder could not be read, or Cargo could not clean it.
+    #[error("The target folder {} could not be cleaned: {reason}", .folder.display())]
     #[non_exhaustive]
-    Unremovable {
-        /// The folder of the build output.
+    TargetFolderNotCleaned {
+        /// The folder.
         folder: PathBuf,
-        /// The reason the system gave.
+        /// The reason the system gave, or what Cargo wrote to its error output.
         reason: String,
     },
 

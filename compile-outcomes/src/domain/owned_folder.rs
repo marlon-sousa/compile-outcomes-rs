@@ -1,4 +1,4 @@
-//! Entity: what the disk holds where a compilation writes, and whose it is.
+//! Entity: what the disk holds where a compilation replaces or removes a folder, and whose it is.
 
 use strum::EnumIs;
 
@@ -7,7 +7,7 @@ use strum::EnumIs;
 /// A user who creates it in an existing folder hands that folder over, to be replaced.
 pub(crate) const OWNER_MARKER: &str = ".owned-by-compile-outcomes";
 
-/// The file Cargo writes into every target folder it makes, marking it as build output.
+/// The file Cargo writes into a target folder when it makes it, marking it as build output, as Cargo does from 1.85 to 1.97 at least.
 pub(crate) const CARGO_MARKER: &str = "CACHEDIR.TAG";
 
 /// What the disk holds at a folder compile-outcomes would replace or remove.

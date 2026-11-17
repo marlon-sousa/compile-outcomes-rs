@@ -3,11 +3,11 @@
 use std::fs;
 use std::path::PathBuf;
 
-use compile_outcomes::Compilation;
+use compile_outcomes::{Compilation, compile};
 use cucumber::{given, then};
 
 use super::given::edition;
-use super::{Compiling, work_dir};
+use super::{Compiling, fixture, work_dir};
 
 /// The work folder whose project folder holds a file compile-outcomes did not write.
 fn foreign_work_dir() -> PathBuf {
@@ -24,7 +24,7 @@ fn clean_work_dir() -> PathBuf {
     work_dir().with_extension("clean")
 }
 
-/// The file an earlier build left in the build output of [`clean_work_dir`].
+/// A file left in the build output of [`clean_work_dir`] after a real build, beside what Cargo wrote there.
 fn left_behind() -> PathBuf {
     clean_work_dir().join("target/debug/left-behind")
 }
@@ -61,8 +61,9 @@ fn handed_over(_world: &mut Compiling) {
 )]
 fn a_compilation_with_a_build_output(world: &mut Compiling, year: u16) {
     start_in(world, clean_work_dir(), year);
-    fs::create_dir_all(clean_work_dir().join("target/debug")).unwrap();
-    fs::write(clean_work_dir().join("target/CACHEDIR.TAG"), "").unwrap();
+    let earlier =
+        Compilation::new(edition(year), clean_work_dir()).snippet(fixture("snippets/unused.rs"));
+    compile(&earlier).unwrap();
     fs::write(left_behind(), "").unwrap();
 }
 

@@ -18,6 +18,11 @@ Feature: What the compiler said about each snippet
     Then the snippet "unused" compiled
     And the snippet "unused" has the warning "unused variable: `unused`" with the code "unused_variables" at line 2, column 9
 
+  Scenario: A diagnostic's file is as the compiler names it, with the separators of the platform
+    Given the snippet "snippets/unused.rs"
+    When it is compiled
+    Then the warning of "unused" points at its file as the compiler names it, with the separators of the platform
+
   Scenario: A snippet that fails reports its error with its code and where it points
     Given the snippet "snippets/shout.rs"
     When it is compiled

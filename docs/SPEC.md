@@ -22,7 +22,7 @@ It is made for test suites that check what a library tells its users when they m
 
 A `Compilation` describes one compilation. It is built step by step, and each step returns it:
 
-1. `Compilation::new(edition, work_dir)` starts one. `edition` is an `Edition`: `E2015`, `E2018`, `E2021` or `E2024`. `work_dir` is a folder compile-outcomes owns: it writes the project it builds there, and reuses the build output there from one compilation to the next. Two compilations must not use the same `work_dir` at the same time.
+1. `Compilation::new(edition, work_dir)` starts one. `edition` is an `Edition`: `E2015`, `E2018`, `E2021` or `E2024`. `work_dir` is a folder compile-outcomes owns: it writes the project it builds there, and reuses the build output there from one compilation to the next, unless the build is clean. Two compilations must not use the same `work_dir` at the same time.
 2. `.snippet(path)` adds the snippet in the file `path`, whatever its extension.
 3. `.snippets_in(dir)` adds every file of `dir` whose extension is `rs`, not looking into subfolders.
 4. `.dependency(dependency)` gives every snippet a dependency, a `Dependency`:
@@ -31,7 +31,7 @@ A `Compilation` describes one compilation. It is built step by step, and each st
    - `.features([...])` enables those features of it;
    - `.without_default_features()` turns its default features off.
 5. `.lockfile(path)` copies that `Cargo.lock` into the project before building, so that the dependencies resolve to the versions it holds, such as those of the caller's own workspace. Cargo still updates the copy where it must, and the original is never written.
-6. `.clean_build()` removes the build output, `work_dir/target`, before building, so that every crate compiles again, dependencies included, as after `cargo clean`.
+6. `.clean_build()` has Cargo clean the build output before building, so that every crate compiles again, dependencies included, as after `cargo clean`.
 
 Describing a compilation touches nothing on disk; only compiling it does.
 
@@ -50,7 +50,7 @@ A relative path, whether of a snippet, a folder, a dependency, the lockfile or t
 `compile_outcomes::compile(&compilation)` compiles every snippet and returns either the `Outcomes` or the `Errors` that kept it from them.
 
 1. It writes the generated workspace to `work_dir/project`, replacing whatever an earlier compilation left there, and copies the lockfile into it when one was given. It also writes there an empty file, `.owned-by-compile-outcomes`, which marks the folder as its own. It replaces the folder only when it is missing, empty or marked: a folder holding files without the mark is left untouched, so that a folder that was never compile-outcomes' is never deleted. Creating that file in such a folder hands it over, to be replaced.
-2. With `.clean_build()`, it then removes the target folder, `work_dir/target`. Cargo writes a file named `CACHEDIR.TAG` into every target folder it makes, and the target folder is removed only when it is missing, empty or holds that file: one holding files without it is left untouched, and the compilation refused, so that a folder that was never Cargo's is never deleted. Both folders are checked before either is changed.
+2. With `.clean_build()`, it then runs `cargo clean --color=never` there, with the target folder `work_dir/target`, which removes that folder and the build folder the user's Cargo configuration names, if any. Cargo writes a file named `CACHEDIR.TAG` into a target folder when it makes it, and the target folder is cleaned only when it is missing, empty or holds that file: one holding files without it is left untouched, and the compilation refused, so that a folder that was never Cargo's is never deleted. Both folders are checked before either is changed.
 3. It runs `cargo build --workspace --keep-going --message-format=json --color=never` there, with the target folder `work_dir/target`. `--keep-going` lets every snippet compile even when an earlier one failed, and `--color=never` keeps what Cargo writes free of terminal colour codes, which a screen reader would read aloud.
 4. It runs the `cargo` the `CARGO` environment variable names, which Cargo sets for the tests and build scripts it runs, so a suite compiles its snippets with its own toolchain; otherwise the `cargo` found on the `PATH`.
 5. Cargo works as configured for the user: its network access, its registries and its environment variables apply.
@@ -66,7 +66,7 @@ A relative path, whether of a snippet, a folder, a dependency, the lockfile or t
    - `rendered`, the whole message as a terminal shows it.
 4. **Errors are the messages of level error**, an internal compiler error included; **warnings are those of level warning**. The compiler's closing notes, such as "For more information about an error, try `rustc --explain`", are neither, and are left out.
 5. **Diagnostics keep the order the compiler gave them.**
-6. **Diagnostics are as the compiler gave them.** compile-outcomes rewrites nothing in them: a path keeps the separators of the platform, and the words are those of the compiler that ran, which change from one Rust version to the next.
+6. **Diagnostics are as the compiler gave them.** Beyond keeping the first line of `message`, compile-outcomes rewrites nothing in them: a path keeps the separators of the platform, and the words are those of the compiler that ran, which change from one Rust version to the next.
 
 ## 6. Errors
 
@@ -80,9 +80,9 @@ A relative path, whether of a snippet, a folder, a dependency, the lockfile or t
    - a lockfile given to `.lockfile` that cannot be read, naming it, with the reason the system gave.
 2. **Problems while compiling stop it**, and are reported alone:
    - the folder `work_dir/project` holds files without the mark of §4, rule 1, naming the folder and how to hand it over;
-   - for a clean build, the folder `work_dir/target` holds files without Cargo's mark of §4, rule 2, naming the folder;
+   - for a clean build, the folder `work_dir/target` holds files without Cargo's mark of §4, rule 2, naming the folder and the mark;
    - the project, or the copy of the lockfile, cannot be written, naming what could not be written, with the reason the system gave;
-   - for a clean build, the target folder cannot be removed, naming it, with the reason the system gave;
+   - for a clean build, the target folder cannot be read, or Cargo cannot clean it, naming the folder, with the reason the system gave or what Cargo wrote to its error output;
    - Cargo cannot be started, naming the program run, with the reason the system gave;
    - Cargo stops without building any snippet and without a compiler message, such as when a dependency cannot be found or resolved, with what it wrote to its error output;
    - a dependency fails to compile, naming it, with its errors;

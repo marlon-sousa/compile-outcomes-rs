@@ -34,23 +34,10 @@ impl Disk for FileSystem {
         Ok(files)
     }
 
-    fn names_in(&self, folder: &Path) -> Result<Option<BTreeSet<OsString>>, Error> {
+    fn names_in(&self, folder: &Path) -> Result<Option<BTreeSet<OsString>>, String> {
         match fs::read_dir(folder) {
             Err(error) if error.kind() == ErrorKind::NotFound => Ok(None),
-            listed => listed
-                .and_then(names)
-                .map(Some)
-                .map_err(|error| unwritable(folder, &error)),
-        }
-    }
-
-    fn remove(&self, folder: &Path) -> Result<(), Error> {
-        match fs::remove_dir_all(folder) {
-            Err(error) if error.kind() != ErrorKind::NotFound => Err(Error::Unremovable {
-                folder: folder.to_owned(),
-                reason: error.to_string(),
-            }),
-            _ => Ok(()),
+            listed => listed.and_then(names).map(Some).map_err(reason),
         }
     }
 

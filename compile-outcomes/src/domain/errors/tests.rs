@@ -48,14 +48,14 @@ fn every_error_reads_as_a_sentence_naming_what_it_is_about() {
             Error::ForeignTargetFolder {
                 folder: PathBuf::from("work/target"),
             },
-            "The folder work/target holds files Cargo did not mark as its build output, with a file named CACHEDIR.TAG, so it was left untouched. Give the compilation another work folder, or remove that folder yourself.",
+            "The folder work/target holds files but no file named CACHEDIR.TAG, the mark Cargo leaves in its build output, so it was left untouched. Give the compilation another work folder, or remove that folder yourself.",
         ),
         (
-            Error::Unremovable {
+            Error::TargetFolderNotCleaned {
                 folder: PathBuf::from("work/target"),
                 reason: "Permission denied (os error 13)".to_owned(),
             },
-            "The build output at work/target could not be removed: Permission denied (os error 13)",
+            "The target folder work/target could not be cleaned: Permission denied (os error 13)",
         ),
         (
             Error::UnreadableLockfile {
