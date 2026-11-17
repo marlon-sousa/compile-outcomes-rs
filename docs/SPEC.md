@@ -9,7 +9,8 @@ Everything this document describes outside this section ships in 0.1.0. These ar
 - snippets compiled as binaries or tests instead of libraries;
 - dependencies given by git URL, and dependencies that only some snippets get;
 - choosing the target triple, the profile or extra `rustc` flags;
-- a time limit on a compilation.
+- a time limit on a compilation;
+- diagnostics with their paths rewritten alike on every platform, such as the snippet folders written as a placeholder, which a later version may add as an option, leaving them as the compiler gave them by default.
 
 ## 1. Purpose
 
@@ -65,6 +66,7 @@ A relative path, whether of a snippet, a folder, a dependency, the lockfile or t
    - `rendered`, the whole message as a terminal shows it.
 4. **Errors are the messages of level error**, an internal compiler error included; **warnings are those of level warning**. The compiler's closing notes, such as "For more information about an error, try `rustc --explain`", are neither, and are left out.
 5. **Diagnostics keep the order the compiler gave them.**
+6. **Diagnostics are as the compiler gave them.** compile-outcomes rewrites nothing in them: a path keeps the separators of the platform, and the words are those of the compiler that ran, which change from one Rust version to the next.
 
 ## 6. Errors
 
