@@ -4,7 +4,7 @@ Every release of compile-outcomes. Each section is written in the release's pull
 
 ## [0.1.0]
 
-The first release, the same as 0.1.0-alpha.1, which snapfit used to check its compile-fail fixtures on Linux, macOS and Windows.
+The first release, the same as 0.1.0-alpha.1, which a snapfit pull request used to check its compile-fail fixtures on Linux, macOS and Windows.
 
 ### Added
 
