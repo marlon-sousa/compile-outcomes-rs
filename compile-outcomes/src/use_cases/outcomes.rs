@@ -8,7 +8,7 @@ use crate::domain::{
 
 /// The outcome of every snippet, or the first problem that kept Cargo from giving them.
 pub(crate) fn outcomes(snippets: &[Snippet], report: BuildReport) -> Result<Outcomes, Error> {
-    let crates: BTreeSet<String> = snippets.iter().map(crate_name).collect();
+    let crates: BTreeSet<String> = snippets.iter().map(Snippet::crate_name).collect();
     if stopped_early(&crates, &report) {
         return Err(Error::CargoStopped {
             output: report.error_output,
@@ -22,10 +22,6 @@ pub(crate) fn outcomes(snippets: &[Snippet], report: BuildReport) -> Result<Outc
         .map(|snippet| outcome(snippet, &report))
         .collect::<Result<BTreeMap<_, _>, _>>()
         .map(Outcomes::of)
-}
-
-fn crate_name(snippet: &Snippet) -> String {
-    snippet.name.crate_name()
 }
 
 fn stopped_early(crates: &BTreeSet<String>, report: &BuildReport) -> bool {
@@ -51,7 +47,7 @@ fn is_dependency(crate_name: &str, snippet_crates: &BTreeSet<String>) -> bool {
 }
 
 fn outcome(snippet: &Snippet, report: &BuildReport) -> Result<(SnippetName, Outcome), Error> {
-    let crate_name = crate_name(snippet);
+    let crate_name = snippet.crate_name();
     let errors = diagnostics(&report.messages, &crate_name, is_error);
     let warnings = diagnostics(&report.messages, &crate_name, Level::is_warning);
     let outcome = if !errors.is_empty() {

@@ -16,7 +16,7 @@ pub(crate) fn project(compilation: &Compilation, snippets: &[Snippet]) -> Projec
 
 fn package(snippet: &Snippet) -> Package {
     Package {
-        name: snippet.name.crate_name(),
+        name: snippet.crate_name(),
         library: snippet.file.clone(),
     }
 }

@@ -79,7 +79,7 @@ fn first_of_its_name(
     taken: &mut BTreeMap<String, PathBuf>,
     errors: &mut Vec<Error>,
 ) -> Option<Snippet> {
-    match taken.entry(snippet.name.crate_name()) {
+    match taken.entry(snippet.crate_name()) {
         Entry::Vacant(free) => {
             free.insert(snippet.file.clone());
             Some(snippet)
