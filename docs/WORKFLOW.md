@@ -113,14 +113,16 @@ Once the pull request has merged, the maintainer tags the commit the merge put o
 2. **checks**, every job of `ci.yml` again on the tagged commit;
 3. **release tools**, the release gate and the crates.io rule against their fixtures under `.github/release/`;
 4. **the crate's package**, the `.crate` file of compile-outcomes;
-5. **crates.io**, for a version that goes there, once every job before it passed;
+5. **crates.io**, for a version that goes there, once every job before it passed, publishing it as the next part says;
 6. **GitHub release**, with the `create-release` action of [itinera-dev/actions](https://github.com/itinera-dev/actions): the version's section of `CHANGELOG.md` as its notes, a pre-release for a version such as `0.2.0-rc.1`, and the package attached.
 
 A pull request that changes how releases are made runs the release tools and packs the crate, without releasing anything.
 
 ### Publishing to crates.io
 
-crates.io's trusted publishing lets the workflow publish without a token, but it is set up on a crate that already exists there. So the first version, 0.1.0, is published by hand: once the checks on the tagged commit and the crates.io dry run have passed, the maintainer runs `cargo publish --package compile-outcomes --locked` at the tagged commit, from Linux or macOS. The crate's licence files are links to the ones at the root, which a Windows checkout without symbolic links would pack as text. Until trusted publishing is set up, the crates.io job only runs `cargo publish --workspace --dry-run --locked`. A later pull request then makes the job publish, in a `crates-io` environment, with the `publish-crates` action of itinera-dev/actions.
+The crates.io job publishes with crates.io's trusted publishing, so the repository keeps no token. crates.io trusts `release.yml` of this repository in the GitHub environment `crates-io`, which only tags `v*` may deploy to. The job asks GitHub for a token proving where it runs, `rust-lang/crates-io-auth-action` exchanges it for a short-lived crates.io token, and `cargo publish --package compile-outcomes --locked` uses it. It runs on Linux, since the crate's licence files are links to the ones at the root, which a Windows checkout without symbolic links would pack as text.
+
+Trusted publishing is set up on a crate that already exists on crates.io, so the first version, 0.1.0, was published by hand by the maintainer.
 
 ## 10. Issues come first
 
