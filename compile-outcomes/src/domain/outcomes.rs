@@ -20,14 +20,14 @@ impl Outcomes {
         Self(outcomes)
     }
 
-    /// The outcome of the snippet named `name`, or `None` when the compilation had no such snippet.
-    pub fn get(&self, name: &str) -> Option<&Outcome> {
-        self.0.get(name)
-    }
+    delegate::delegate! {
+        to self.0 {
+            /// The outcome of the snippet named `name`, or `None` when the compilation had no such snippet.
+            pub fn get(&self, name: &str) -> Option<&Outcome>;
 
-    /// Every snippet's name and outcome, in the order of the names.
-    pub fn iter(&self) -> impl Iterator<Item = (&SnippetName, &Outcome)> {
-        self.0.iter()
+            /// Every snippet's name and outcome, in the order of the names.
+            pub fn iter(&self) -> impl Iterator<Item = (&SnippetName, &Outcome)>;
+        }
     }
 }
 

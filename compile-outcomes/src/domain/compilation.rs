@@ -1,19 +1,26 @@
 //! Entity: the description of a compilation, built step by step.
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
+
+use getset::{CopyGetters, Getters};
 
 use crate::domain::{Dependency, Edition};
 
 /// The description of one compilation: its snippets, the dependencies they share and the edition they are compiled with.
 ///
 /// Describing a compilation touches nothing on disk; only compiling it does.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Getters, CopyGetters)]
 pub struct Compilation {
+    #[getset(get_copy = "pub(crate)")]
     edition: Edition,
+    #[getset(get = "pub(crate)")]
     work_dir: PathBuf,
+    #[getset(get = "pub(crate)")]
     sources: Vec<SnippetSource>,
+    #[getset(get = "pub(crate)")]
     dependencies: Vec<Dependency>,
-    lockfile: Option<PathBuf>,
+    #[getset(get = "pub(crate)")]
+    lockfile_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -32,7 +39,7 @@ impl Compilation {
             work_dir: work_dir.into(),
             sources: Vec::new(),
             dependencies: Vec::new(),
-            lockfile: None,
+            lockfile_path: None,
         }
     }
 
@@ -62,28 +69,8 @@ impl Compilation {
     /// Cargo still updates the copy where it must, and the original is never written.
     #[must_use]
     pub fn lockfile(mut self, path: impl Into<PathBuf>) -> Self {
-        self.lockfile = Some(path.into());
+        self.lockfile_path = Some(path.into());
         self
-    }
-
-    pub(crate) fn edition(&self) -> Edition {
-        self.edition
-    }
-
-    pub(crate) fn work_dir(&self) -> &Path {
-        &self.work_dir
-    }
-
-    pub(crate) fn sources(&self) -> &[SnippetSource] {
-        &self.sources
-    }
-
-    pub(crate) fn dependencies(&self) -> &[Dependency] {
-        &self.dependencies
-    }
-
-    pub(crate) fn lockfile_path(&self) -> Option<&Path> {
-        self.lockfile.as_deref()
     }
 }
 

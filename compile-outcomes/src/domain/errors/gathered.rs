@@ -4,6 +4,7 @@ use std::iter::{Chain, Once, once};
 use std::slice::Iter;
 use std::vec::IntoIter;
 
+use getset::Getters;
 use thiserror::Error;
 
 use crate::domain::Error;
@@ -11,9 +12,11 @@ use crate::domain::Error;
 /// Every problem that kept a compilation from its outcomes, in the order they were found; never empty.
 ///
 /// Its `Display` is every problem's sentence, each starting on a line of its own.
-#[derive(Debug, Clone, PartialEq, Eq, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Error, Getters)]
 #[error("{}", sentences(self))]
 pub struct Errors {
+    /// The first problem found.
+    #[getset(get = "pub")]
     first: Error,
     rest: Vec<Error>,
 }
@@ -27,11 +30,6 @@ impl Errors {
             first,
             rest: errors.collect(),
         })
-    }
-
-    /// The first problem found.
-    pub fn first(&self) -> &Error {
-        &self.first
     }
 
     /// Every problem, in the order they were found.

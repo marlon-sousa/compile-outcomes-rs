@@ -19,9 +19,11 @@ impl SnippetName {
             .map(Self)
     }
 
-    /// The name, as a snippet's file gives it.
-    pub fn as_str(&self) -> &str {
-        &self.0
+    delegate::delegate! {
+        to self.0 {
+            /// The name, as a snippet's file gives it.
+            pub fn as_str(&self) -> &str;
+        }
     }
 
     pub(crate) fn crate_name(&self) -> String {

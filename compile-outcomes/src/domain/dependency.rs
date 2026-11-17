@@ -2,14 +2,19 @@
 
 use std::path::PathBuf;
 
+use getset::{CopyGetters, Getters};
 use strum::EnumIs;
 
 /// A crate every snippet of a compilation depends on, as a manifest's `[dependencies]` names it.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Getters, CopyGetters)]
 pub struct Dependency {
+    #[getset(get = "pub(crate)")]
     name: String,
+    #[getset(get = "pub(crate)")]
     source: Source,
-    features: Vec<String>,
+    #[getset(get = "pub(crate)")]
+    enabled_features: Vec<String>,
+    #[getset(get_copy = "pub(crate)")]
     default_features: DefaultFeatures,
 }
 
@@ -43,7 +48,8 @@ impl Dependency {
         I: IntoIterator,
         I::Item: Into<String>,
     {
-        self.features.extend(features.into_iter().map(Into::into));
+        self.enabled_features
+            .extend(features.into_iter().map(Into::into));
         self
     }
 
@@ -58,25 +64,9 @@ impl Dependency {
         Self {
             name,
             source,
-            features: Vec::new(),
+            enabled_features: Vec::new(),
             default_features: DefaultFeatures::On,
         }
-    }
-
-    pub(crate) fn name(&self) -> &str {
-        &self.name
-    }
-
-    pub(crate) fn source(&self) -> &Source {
-        &self.source
-    }
-
-    pub(crate) fn enabled_features(&self) -> &[String] {
-        &self.features
-    }
-
-    pub(crate) fn default_features(&self) -> DefaultFeatures {
-        self.default_features
     }
 }
 

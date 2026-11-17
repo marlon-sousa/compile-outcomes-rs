@@ -34,7 +34,7 @@ fn features_given_twice_are_all_enabled_in_order() {
         .features(["derive"])
         .features(["std", "rc"]);
 
-    assert_eq!(dependency.enabled_features(), ["derive", "std", "rc"]);
+    assert_eq!(*dependency.enabled_features(), ["derive", "std", "rc"]);
 }
 
 #[test]

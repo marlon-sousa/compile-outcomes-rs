@@ -11,7 +11,7 @@ fn a_new_compilation_has_nothing_but_its_edition_and_folder() {
     assert_eq!(compilation.work_dir(), Path::new("target/outcomes"));
     assert!(compilation.sources().is_empty());
     assert!(compilation.dependencies().is_empty());
-    assert_eq!(compilation.lockfile_path(), None);
+    assert_eq!(compilation.lockfile_path(), &None);
 }
 
 #[test]
@@ -22,7 +22,7 @@ fn snippets_and_folders_keep_the_order_they_were_given() {
         .snippet("ui/b.rs");
 
     assert_eq!(
-        compilation.sources(),
+        *compilation.sources(),
         [
             SnippetSource::File(PathBuf::from("ui/a.rs")),
             SnippetSource::Folder(PathBuf::from("ui/more")),
@@ -38,6 +38,9 @@ fn dependencies_and_the_lockfile_are_kept() {
         .dependency(greeting.clone())
         .lockfile("Cargo.lock");
 
-    assert_eq!(compilation.dependencies(), [greeting]);
-    assert_eq!(compilation.lockfile_path(), Some(Path::new("Cargo.lock")));
+    assert_eq!(*compilation.dependencies(), [greeting]);
+    assert_eq!(
+        compilation.lockfile_path().as_deref(),
+        Some(Path::new("Cargo.lock"))
+    );
 }
