@@ -22,7 +22,7 @@ impl Cargo for CargoProcess {
         } else {
             Err(Error::TargetFolderNotCleaned {
                 folder: project.target_dir.clone(),
-                reason: String::from_utf8_lossy(&output.stderr).trim().to_owned(),
+                reason: String::from_utf8_lossy(&output.stderr).into_owned(),
             })
         }
     }
