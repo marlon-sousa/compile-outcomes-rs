@@ -69,6 +69,10 @@ Each `Diagnostic` has its `message`, the first line; its `code`, such as `E0425`
 
 compile-outcomes runs the `cargo` the `CARGO` environment variable names, which Cargo sets for the tests it runs, so your snippets compile with the same toolchain as your tests. Otherwise it runs the `cargo` on the `PATH`. Cargo works as configured for you: its network access, registries and environment variables apply.
 
+### Platforms
+
+compile-outcomes works the same on Linux, macOS and Windows, and its tests run on all three. It compares no text, so it rewrites none: a diagnostic's `location.file` is the path the compiler gave, with the platform's separators, and its `message` and `rendered` are the compiler's own words. A test that compares them with text it holds, the same on every platform, makes paths alike first, for example by replacing each `\` with `/`.
+
 ### What 0.1.0 does not do yet
 
 Snippets compiled as binaries or tests, dependencies by git URL or for only some snippets, choosing the target, the profile or extra `rustc` flags, and a time limit are not part of 0.1.0. [docs/SPEC.md](docs/SPEC.md) describes exactly what it does.
