@@ -80,7 +80,7 @@ A pull request is ready to merge when:
 
 Every action a workflow uses is pinned to a commit, with its version in a comment beside it.
 
-- **`.github/workflows/ci.yml`**, on every pull request and every push to `main`, the layers of a stack included, since each is a pull request: each mode of `cargo xtask ci` in a job of its own on Linux, the `test` mode on Linux, macOS and Windows, and the `test` mode again with the minimum supported Rust.
+- **`.github/workflows/ci.yml`**, on every pull request, the layers of a stack included, and every push to `main`: each mode of `cargo xtask ci` in a job of its own on Linux, the `test` mode on Linux, macOS and Windows, and the `test` mode again with the minimum supported Rust.
 - **`.github/workflows/pull-request.yml`**, on every pull request, whatever its base: the description names an open issue of this repository and closes none of another, with the `pr-has-issue` and `no-cross-repo-closing` actions of itinera-dev/actions; every commit message keeps the convention of section 3; and the description has no unticked checkbox. Ticking a checkbox runs only this workflow again.
 - **`.github/workflows/release.yml`**, on a tag `v<version>`, and on a pull request that changes how releases are made: section 9 describes it.
 - **`.github/workflows/weekly.yml`**, each Monday: the `test` mode on Rust beta, so that a change in the next Rust that breaks compile-outcomes, such as a change to the messages Cargo writes, is known before it is released.
