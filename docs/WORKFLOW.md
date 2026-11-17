@@ -18,7 +18,7 @@ How a change to compile-outcomes travels from an issue to `main`. [AGENTS.md](..
 
 ## 3. Branches and commits
 
-- **Branches** are named `stack/<number>-<what it does>`, such as `stack/02-the-model`.
+- **Branches** are named freely, after what they do; a stack is the chain of its pull requests, as section 4 says, not of its branch names.
 - **Commit messages** follow [Conventional Commits](https://www.conventionalcommits.org/), such as `feat(outcomes): keep the order the compiler gave the diagnostics`.
 - **Commit types:** `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert` or `test`; a formatting-only change is a `refactor`.
 - **Changelog entries:** a `feat`, a `fix` or a breaking change (`!` before the colon) ends with at least one trailer, `Added:`, `Changed:`, `Fixed:` or `Removed:`, each a one-line entry of the changelog as a user reads it, or with `Changelog: none` when a user meets no change. For example:
@@ -80,7 +80,7 @@ A pull request is ready to merge when:
 
 Every action a workflow uses is pinned to a commit, with its version in a comment beside it.
 
-- **`.github/workflows/ci.yml`**, on every pull request and every push to `main` or a `stack/*` branch: each mode of `cargo xtask ci` in a job of its own on Linux, the `test` mode on Linux, macOS and Windows, and the `test` mode again with the minimum supported Rust.
+- **`.github/workflows/ci.yml`**, on every pull request and every push to `main`, the layers of a stack included, since each is a pull request: each mode of `cargo xtask ci` in a job of its own on Linux, the `test` mode on Linux, macOS and Windows, and the `test` mode again with the minimum supported Rust.
 - **`.github/workflows/pull-request.yml`**, on every pull request, whatever its base: the description names an open issue of this repository and closes none of another, with the `pr-has-issue` and `no-cross-repo-closing` actions of itinera-dev/actions; every commit message keeps the convention of section 3; and the description has no unticked checkbox. Ticking a checkbox runs only this workflow again.
 - **`.github/workflows/release.yml`**, on a tag `v<version>`, and on a pull request that changes how releases are made: section 9 describes it.
 - **`.github/workflows/weekly.yml`**, each Monday: the `test` mode on Rust beta, so that a change in the next Rust that breaks compile-outcomes, such as a change to the messages Cargo writes, is known before it is released.

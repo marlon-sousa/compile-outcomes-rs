@@ -4,9 +4,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - "stack/**"
+    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
   # The release workflow runs these checks again on the tagged commit.
