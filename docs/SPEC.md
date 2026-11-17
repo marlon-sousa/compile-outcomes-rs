@@ -67,7 +67,7 @@ Describing a compilation touches nothing on disk; only compiling it does.
 `Errors` holds every problem that kept a compilation from its outcomes, in the order they were found, and is never empty: `.first()` gives the first, and `.iter()`, or a `for` loop over it, every one. Each `Error` is a sentence that names what it is about, and `Errors` reads as those sentences, each starting on a line of its own.
 
 1. **Problems with the description are reported together**, before anything is written:
-   - a compilation with no snippet;
+   - a compilation with no snippet, when every file and folder it names could be read;
    - a snippet whose name breaks §3, rule 2, naming its file;
    - two snippets with the same name, or names that differ only by `-` and `_`, naming both files;
    - a snippet file, or a folder given to `.snippets_in`, that cannot be read, naming which, with the reason the system gave.
