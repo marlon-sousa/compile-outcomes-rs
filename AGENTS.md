@@ -40,7 +40,9 @@ Every pull request is reviewed by an independent reviewer before it is opened, o
 11. Every crate the change adds, removes or uses in a new way, and every claim that a library or a tool can or cannot do something, against rule 9 above: it names the source it was checked against at each version, and, for a crate, what the newest release rule 9 names does that the one we use cannot.
 12. Every statement of docs/SPEC.md, docs/ARCHITECTURE.md, docs/WORKFLOW.md and README.md the change makes untrue, which the change updates itself.
 13. The commit messages and the description, against rules 6 and 11 above and docs/WORKFLOW.md: that the description names its issues unless every commit, merges aside, is a `test`, and that the change does what they agreed, no more; for a layer of a stack, that its branch sits on the current tip of the layer below.
-14. The checks under "Building and testing", run at the reviewed revision, without changing the checkout the author works in.
+14. Every pattern the change copies from code already in the repository: the original is reviewed too, against the same items, and what is wrong is reported in both places.
+15. Every input the change accepts, such as a snippet, a dependency, a path or a setting of `Compilation`: whether a test covers the awkward forms a user can write, such as an empty list, a repeated entry, several mistakes at once, or input that comes from a macro or another unusual source. For each form no test covers, the reviewer writes a small probe in its own worktree and reports what it showed, or reports the gap.
+16. The checks under "Building and testing", run at the reviewed revision, without changing the checkout the author works in.
 
 The report lists findings, each marked blocking or not, with its `file:line` and a fix, then a verdict: approve, or changes needed. A finding the author rejects goes back to the reviewer with the reason, and a blocking one closes only when the reviewer agrees or the maintainer decides. A pull request is reported ready to the maintainer only once both the review and the CI of its latest push have passed.
 
