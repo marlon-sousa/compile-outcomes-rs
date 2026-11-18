@@ -7,7 +7,7 @@ The manual for anyone, human or agent, changing compile-outcomes. [docs/WORKFLOW
 - [docs/SPEC.md](docs/SPEC.md): what compile-outcomes does, accepts and refuses, and what ships in 0.1.0. Code does what it says, no more and no less.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): how the code is organised and written, before writing any.
 - [.claude/skills/](.claude/skills/): the procedures, such as having a change reviewed. Claude Code loads them on its own; another agent reads the one it needs.
-- The issue the work belongs to, and its pull request. Once a decision is agreed there, it binds the work.
+- The issues the work belongs to, and its pull request. Once a decision is agreed there, it binds the work.
 
 ## Rules
 
@@ -21,11 +21,11 @@ The manual for anyone, human or agent, changing compile-outcomes. [docs/WORKFLOW
 8. **Mark agent comments.** A comment an agent writes on GitHub says it is an agent's.
 9. **Check a library before ruling it in or out.** Before saying that a crate or a tool can or cannot do something, read its source or its documentation, including its extension points, at the version we use. For a crate, also read it at the newest release, not yanked, whose `rust-version` is at most ours in `Cargo.toml`: a newer release may do what the one we use cannot. The pull request says what was checked at each version: the file and line, or the documentation page.
 10. **One question at a time.** A question for the maintainer is asked in plain prose, one decision at a time, with the option recommended and why.
-11. **Issues come first.** Every change starts from an agreed issue, and its pull request names it, as docs/WORKFLOW.md, section 10, says. A decision taken outside the issue, such as in a chat, is recorded on it at once.
+11. **Issues come first.** Every change starts from an agreed issue, except one whose commits, merges aside, are all `test` commits, and its pull request names it, as docs/WORKFLOW.md, section 10, says. Its label says what kind of decision the issue holds. A decision taken outside the issue, such as in a chat, is recorded on it at once.
 
 ## Reviewing a change
 
-Every pull request is reviewed by an independent reviewer before it is opened, one given the change, not its author's reasoning. A later push to an open pull request is reviewed the same way while its CI runs. An agent's `.claude/skills/review-change` says how to start and resume the reviewer. The reviewer is given this section in full, the documents under "What to read", the issue the change belongs to, the commits to review and the draft pull request description. For each item, it lists every place in the diff where the item applies, not only the first, and checks each against the rule it names.
+Every pull request is reviewed by an independent reviewer before it is opened, one given the change, not its author's reasoning. A later push to an open pull request is reviewed the same way while its CI runs. An agent's `.claude/skills/review-change` says how to start and resume the reviewer. The reviewer is given this section in full, the documents under "What to read", the issues the change belongs to, the commits to review and the draft pull request description. For each item, it lists every place in the diff where the item applies, not only the first, and checks each against the rule it names.
 
 1. Every behaviour the change adds or changes, against docs/SPEC.md and its issue, and against rules 1 to 3 above: its scenario, its service test, its regression test.
 2. Every error the change adds or changes, against rule 4 above and docs/ARCHITECTURE.md, "Errors": its words, what it names, and that it is reported with the other problems found where the description has several.
@@ -39,7 +39,7 @@ Every pull request is reviewed by an independent reviewer before it is opened, o
 10. Every comment and doc comment, against docs/ARCHITECTURE.md, "Comments".
 11. Every crate the change adds, removes or uses in a new way, and every claim that a library or a tool can or cannot do something, against rule 9 above: it names the source it was checked against at each version, and, for a crate, what the newest release rule 9 names does that the one we use cannot.
 12. Every statement of docs/SPEC.md, docs/ARCHITECTURE.md, docs/WORKFLOW.md and README.md the change makes untrue, which the change updates itself.
-13. The commit messages and the description, against rules 6 and 11 above and docs/WORKFLOW.md: that the description names the issue, and that the change does what the issue agreed, no more; for a layer of a stack, that its branch sits on the current tip of the layer below.
+13. The commit messages and the description, against rules 6 and 11 above and docs/WORKFLOW.md: that the description names its issues unless every commit, merges aside, is a `test`, and that the change does what they agreed, no more; for a layer of a stack, that its branch sits on the current tip of the layer below.
 14. The checks under "Building and testing", run at the reviewed revision, without changing the checkout the author works in.
 
 The report lists findings, each marked blocking or not, with its `file:line` and a fix, then a verdict: approve, or changes needed. A finding the author rejects goes back to the reviewer with the reason, and a blocking one closes only when the reviewer agrees or the maintainer decides. A pull request is reported ready to the maintainer only once both the review and the CI of its latest push have passed.
