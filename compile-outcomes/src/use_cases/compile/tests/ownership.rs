@@ -44,6 +44,27 @@ fn a_project_folder_compile_outcomes_did_not_write_is_left_untouched() {
 }
 
 #[test]
+fn a_project_folder_that_cannot_be_read_is_unwritable_and_nothing_is_built() {
+    let disk = FakeDisk {
+        unreadable: vec![PathBuf::from("work/project")],
+        ..FakeDisk::default()
+    };
+    let cargo = FakeCargo::default();
+
+    let errors = compile(&compilation(), &disk, &cargo).unwrap_err();
+
+    assert_eq!(
+        errors.into_iter().collect::<Vec<_>>(),
+        [Error::Unwritable {
+            path: PathBuf::from("work/project"),
+            reason: "gone".to_owned(),
+        }]
+    );
+    assert!(disk.written.borrow().is_empty());
+    assert!(cargo.steps.borrow().is_empty());
+}
+
+#[test]
 fn a_clean_build_has_cargo_clean_the_build_output_it_made_before_building() {
     let disk = FakeDisk {
         names: holding("work/target", "CACHEDIR.TAG"),

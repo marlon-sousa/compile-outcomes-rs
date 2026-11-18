@@ -6,6 +6,7 @@ use std::fs;
 use compile_outcomes::{Diagnostic, Errors, Location, Outcome, Outcomes};
 use cucumber::gherkin::Step;
 use cucumber::then;
+use toml::{Table, Value};
 
 use super::{Compiling, fixture, work_dir};
 
@@ -142,23 +143,35 @@ fn refused_with_problems(world: &mut Compiling, count: usize) {
 
 #[then(expr = "the project resolved {string} to the version {string}")]
 fn resolved_to(_world: &mut Compiling, name: String, version: String) {
-    let lockfile = fs::read_to_string(work_dir().join("project/Cargo.lock")).unwrap();
-    let mut lines = lockfile.lines();
-    let package = format!("name = \"{name}\"");
-    assert!(lines.any(|line| line == package), "{lockfile}");
-    let locked = format!("version = \"{version}\"");
-    assert_eq!(lines.next(), Some(locked.as_str()), "{lockfile}");
+    let lockfile = project_lockfile();
+    let mut packages = lockfile
+        .get("package")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten();
+    assert!(
+        packages.any(|package| is_locked(package, &name, &version)),
+        "{lockfile}"
+    );
+}
+
+fn is_locked(package: &Value, name: &str, version: &str) -> bool {
+    package.get("name").and_then(Value::as_str) == Some(name)
+        && package.get("version").and_then(Value::as_str) == Some(version)
 }
 
 #[then(expr = "the project's lockfile is of version {int}, as the copy was")]
-fn the_lockfile_version(_world: &mut Compiling, version: u8) {
-    let lockfile = fs::read_to_string(work_dir().join("project/Cargo.lock")).unwrap();
-    assert!(
-        lockfile
-            .lines()
-            .any(|line| line == format!("version = {version}")),
-        "{lockfile}"
-    );
+fn the_lockfile_version(_world: &mut Compiling, version: i64) {
+    let lockfile = project_lockfile();
+    let locked = lockfile.get("version").and_then(Value::as_integer);
+    assert_eq!(locked, Some(version), "{lockfile}");
+}
+
+fn project_lockfile() -> Table {
+    fs::read_to_string(work_dir().join("project/Cargo.lock"))
+        .unwrap()
+        .parse()
+        .unwrap()
 }
 
 #[then("the lockfile \"lockfile.lock\" is left as it was")]

@@ -36,30 +36,24 @@ pub(crate) fn compile(
 
 /// Refuses a project folder compile-outcomes did not write, and for a clean build a target folder Cargo did not make, before either is changed.
 fn untouched_unless_owned(project: &Project, build: Build, disk: &impl Disk) -> Result<(), Error> {
-    let held = match disk.names_in(&project.root) {
-        Ok(held) => held,
-        Err(reason) => {
-            return Err(Error::Unwritable {
-                path: project.root.clone(),
-                reason,
-            });
-        }
-    };
+    let held = disk
+        .names_in(&project.root)
+        .map_err(|reason| Error::Unwritable {
+            path: project.root.clone(),
+            reason,
+        })?;
     if ownership::project_folder(held.as_ref()).is_foreign() {
         return Err(Error::ForeignProjectFolder {
             folder: project.root.clone(),
         });
     }
     if build.is_clean() {
-        let held = match disk.names_in(&project.target_dir) {
-            Ok(held) => held,
-            Err(reason) => {
-                return Err(Error::TargetFolderNotCleaned {
+        let held =
+            disk.names_in(&project.target_dir)
+                .map_err(|reason| Error::TargetFolderNotCleaned {
                     folder: project.target_dir.clone(),
                     reason,
-                });
-            }
-        };
+                })?;
         if ownership::target_folder(held.as_ref()).is_foreign() {
             return Err(Error::ForeignTargetFolder {
                 folder: project.target_dir.clone(),
