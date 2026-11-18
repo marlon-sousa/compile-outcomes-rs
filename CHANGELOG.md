@@ -2,6 +2,10 @@
 
 Every release of compile-outcomes. Each section is written in the release's pull request, from the changelog entries its commits carry as trailers, as [docs/WORKFLOW.md](docs/WORKFLOW.md), "Releases", describes, and becomes the notes of its [GitHub release](https://github.com/marlon-sousa/compile-outcomes-rs/releases). Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.1]
+
+Nothing a user meets changes: 0.1.1 does what 0.1.0 does, built from tidier code. It is the first version released by the release workflow, publishing to crates.io with trusted publishing.
+
 ## [0.1.0]
 
 The first release, the same as 0.1.0-alpha.1, which a snapfit pull request used to check its compile-fail fixtures on Linux, macOS and Windows.
