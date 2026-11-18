@@ -1,5 +1,5 @@
-//! Facade: compiles Rust snippets and reports what the compiler said about each one, without judging.
-//!
+// Facade: compiles Rust snippets and reports what the compiler said about each one, without judging.
+
 #![doc = include_str!("../README.md")]
 
 mod adapters;
