@@ -12,7 +12,7 @@ compile-outcomes does input and output, so it has ports: a port is a trait the s
 
 ## The repository
 
-- **`compile-outcomes/`**, the crate users depend on, laid out as the rest of this document describes. Its `tests/` folder holds the Gherkin scenarios: the features, `tests/features/`; their steps, the test target `tests/scenarios/`; and what they compile, `tests/fixtures/`, snippets and two small crates, `greeting` and `broken`, which the workspace excludes.
+- **`compile-outcomes/`**, the crate users depend on, laid out as the rest of this document describes. Its `README.md` is a symbolic link to the one at the root, and is its documentation on docs.rs, after the role line of `lib.rs`. Its `tests/` folder holds the Gherkin scenarios: the features, `tests/features/`; their steps, the test target `tests/scenarios/`; and what they compile, `tests/fixtures/`, snippets and two small crates, `greeting` and `broken`, which the workspace excludes.
 - **`examples/my_macros/`**, a crate that is never published, holding the README's examples as files: a `#[test]`, a Gherkin feature and its steps, and the snippets they compile. The `test` mode runs them, and the `readme` mode checks that the README shows them as written.
 - **`xtask/`**, the quality gate, `cargo xtask ci`, whose checks CI runs, the tests on Linux, macOS and Windows; [WORKFLOW.md](WORKFLOW.md), section 7, lists them.
 - **`.github/workflows/`**, the CI, pull request, release and weekly workflows, as [WORKFLOW.md](WORKFLOW.md), section 7, lists them, and **`.github/release/`**, the scripts of the release workflow and their fixtures.

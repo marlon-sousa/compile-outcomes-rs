@@ -174,7 +174,7 @@ Compiler messages change from one Rust version to the next, and compile-outcomes
 
 ### What 0.1.0 does not do yet
 
-Snippets compiled as binaries or tests, dependencies by git URL or for only some snippets, choosing the target, the profile or extra `rustc` flags, a time limit, diagnostics with their paths rewritten alike on every platform, and a `Display` for an outcome are not part of 0.1.0; each is planned in an [open issue labelled `feature`](https://github.com/marlon-sousa/compile-outcomes-rs/issues?q=is%3Aissue%20is%3Aopen%20label%3Afeature). [docs/SPEC.md](docs/SPEC.md) describes exactly what 0.1.0 does.
+Snippets compiled as binaries or tests, dependencies by git URL or for only some snippets, choosing the target, the profile or extra `rustc` flags, a time limit, diagnostics with their paths rewritten alike on every platform, and a `Display` for an outcome are not part of 0.1.0; each is planned in an [open issue labelled `feature`](https://github.com/marlon-sousa/compile-outcomes-rs/issues?q=is%3Aissue%20is%3Aopen%20label%3Afeature). [docs/SPEC.md](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/docs/SPEC.md) describes exactly what 0.1.0 does.
 
 The minimum supported Rust version is 1.85.
 
@@ -182,10 +182,10 @@ The minimum supported Rust version is 1.85.
 
 compile-outcomes is built in small, stacked pull requests, each reviewed against written rules:
 
-- [docs/SPEC.md](docs/SPEC.md) says what compile-outcomes does, accepts and refuses. A change to what it does starts there.
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) says how the code is organised and written: a pure domain that decides, and adapters at the edges that write files and run Cargo.
-- [docs/WORKFLOW.md](docs/WORKFLOW.md) says how a change travels to `main`, what each check does, and how a release is made.
-- [AGENTS.md](AGENTS.md) holds the rules every change follows and how it is reviewed, for people and agents alike.
+- [docs/SPEC.md](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/docs/SPEC.md) says what compile-outcomes does, accepts and refuses. A change to what it does starts there.
+- [docs/ARCHITECTURE.md](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/docs/ARCHITECTURE.md) says how the code is organised and written: a pure domain that decides, and adapters at the edges that write files and run Cargo.
+- [docs/WORKFLOW.md](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/docs/WORKFLOW.md) says how a change travels to `main`, what each check does, and how a release is made.
+- [AGENTS.md](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/AGENTS.md) holds the rules every change follows and how it is reviewed, for people and agents alike.
 
 Before pushing, run the quality gate from the repository's root:
 
@@ -197,4 +197,4 @@ It checks formatting, clippy with every warning an error, the architecture, ever
 
 ## Licence
 
-Licensed under either the [Apache License, Version 2.0](LICENSE-APACHE) or the [MIT licence](LICENSE-MIT), at your option.
+Licensed under either the [Apache License, Version 2.0](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/LICENSE-APACHE) or the [MIT licence](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/LICENSE-MIT), at your option.
