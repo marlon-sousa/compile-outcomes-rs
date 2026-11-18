@@ -128,7 +128,7 @@ Trusted publishing is set up on a crate that already exists on crates.io, so the
 
 Every change starts as an issue, and is agreed there before any code is written: building the wrong thing is the expensive mistake, and the issue is the cheapest place to find it. The issues are also the record of every decision taken about compile-outcomes, what it does and how it is built and released, so that a decision can be found again by its kind.
 
-The one exception is a change whose commits, merges aside, are all `test` commits. It changes neither what compile-outcomes does nor how it is built, so it holds no decision of its own: what it checks was agreed already.
+The one exception is a change whose commits, merges aside, are all `test` commits. It changes neither what compile-outcomes does nor how its code is organised or released, so it holds no decision of its own: what it checks was agreed already. It may still add a dependency used only by tests, which the review checks as AGENTS.md, rule 9, asks.
 
 - **A feature** says what is wanted and why, and what it must not break. It can be short; the details are worked out in the issue.
 - **A bug** says what happened, what was expected, and the smallest snippet or compilation that shows it.
