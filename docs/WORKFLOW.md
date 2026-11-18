@@ -66,7 +66,7 @@ A pull request is ready to merge when:
 | `fmt` | rustfmt compliance. |
 | `clippy` | clippy with every warning an error. |
 | `arch` | no input or output in `domain/` or `use_cases/`, no `mod.rs`, and files of at most 200 lines. |
-| `readme` | each code block of README.md marked `<!-- example: <file> -->` is held, as written, by the file it names, which should belong to a crate the gate builds, such as `examples/my_macros`, whose tests run in the `test` mode. |
+| `readme` | each code block of README.md marked `<!-- example: <file> -->` is held, as written, by the file it names, which should belong to a crate the gate builds, such as `examples/my_macros`, whose tests run in the `test` mode; and `compile-outcomes/README.md` is what the root README gives without its `<!-- github-only -->` blocks and with its `<!-- site-only` blocks shown, as `cargo xtask readme --write` writes it. |
 | `test` | every unit test and Gherkin scenario, the README's examples included. |
 | `doc` | the documentation, with every warning an error. |
 | `deny` | the licences, advisories and sources of the dependencies, as `deny.toml` allows them. It needs cargo-deny, installed with `cargo install cargo-deny --version 0.20.2 --locked`. |
@@ -120,7 +120,7 @@ A pull request that changes how releases are made runs the release tools and pac
 
 ### Publishing to crates.io
 
-The crates.io job publishes with crates.io's trusted publishing, so the repository keeps no token. crates.io trusts `release.yml` of this repository in the GitHub environment `crates-io`, which only tags `v*` may deploy to. The job asks GitHub for a token proving where it runs, `rust-lang/crates-io-auth-action` exchanges it for a short-lived crates.io token, and `cargo publish --package compile-outcomes --locked` uses it. It runs on Linux, since the crate's licence files and README are links to the ones at the root, which a Windows checkout without symbolic links would pack as text.
+The crates.io job publishes with crates.io's trusted publishing, so the repository keeps no token. crates.io trusts `release.yml` of this repository in the GitHub environment `crates-io`, which only tags `v*` may deploy to. The job asks GitHub for a token proving where it runs, `rust-lang/crates-io-auth-action` exchanges it for a short-lived crates.io token, and `cargo publish --package compile-outcomes --locked` uses it. It runs on Linux, since the crate's licence files are links to the ones at the root, which a Windows checkout without symbolic links would pack as text.
 
 Trusted publishing is set up on a crate that already exists on crates.io, so the first version, 0.1.0, was published by hand by the maintainer.
 

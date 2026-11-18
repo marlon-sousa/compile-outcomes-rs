@@ -178,6 +178,7 @@ Snippets compiled as binaries or tests, dependencies by git URL or for only some
 
 The minimum supported Rust version is 1.85.
 
+<!-- github-only -->
 ## Contributing
 
 compile-outcomes is built in small, stacked pull requests, each reviewed against written rules:
@@ -193,8 +194,15 @@ Before pushing, run the quality gate from the repository's root:
 cargo xtask ci
 ```
 
-It checks formatting, clippy with every warning an error, the architecture, every unit test and Gherkin scenario, the documentation, the dependencies with cargo-deny, and a publish dry run.
+It checks formatting, clippy with every warning an error, the architecture, the README's examples and the crate's README, every unit test and Gherkin scenario, the documentation, the dependencies with cargo-deny, and a publish dry run.
 
+<!-- end github-only -->
+<!-- site-only
+## Contributing
+
+The source, the issues and how to contribute are in [the repository on GitHub](https://github.com/marlon-sousa/compile-outcomes-rs).
+
+-->
 ## Licence
 
 Licensed under either the [Apache License, Version 2.0](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/LICENSE-APACHE) or the [MIT licence](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/LICENSE-MIT), at your option.

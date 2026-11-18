@@ -27,24 +27,52 @@ pub(crate) enum Step {
     Rustdoc(&'static [&'static str]),
     /// The architecture check.
     Architecture,
-    /// The check that the README's marked examples are what their files hold.
-    Readme,
+    /// The check that the README's marked examples are what their files hold, and the crate's README, checked or written.
+    Readme(CrateReadme),
 }
 
-/// The modes `argument` names: every mode for `ci` or for none, otherwise the one of that name.
-pub(crate) fn requested(argument: Option<&str>) -> Option<Vec<Mode>> {
-    match argument {
-        None | Some("ci") => Some(Mode::iter().collect()),
-        Some(name) => Mode::from_str(name).ok().map(alone),
+/// What the `readme` mode does with the crate's README.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum CrateReadme {
+    /// Refuses one that is not what the root README gives.
+    Check,
+    /// Writes it from the root README, as `cargo xtask readme --write` asks.
+    Write,
+}
+
+/// What the command line asks of the gate.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct Request {
+    pub(crate) modes: Vec<Mode>,
+    pub(crate) crate_readme: CrateReadme,
+}
+
+/// What `arguments` ask: every mode for `ci` or for none, the one mode they name, or `readme --write`; nothing for any other.
+pub(crate) fn requested(arguments: &[&str]) -> Option<Request> {
+    match arguments {
+        [] | ["ci"] => Some(checking(Mode::iter().collect())),
+        ["readme", "--write"] => Some(Request {
+            modes: vec![Mode::Readme],
+            crate_readme: CrateReadme::Write,
+        }),
+        [name] => Mode::from_str(name).ok().map(alone),
+        _ => None,
     }
 }
 
-fn alone(mode: Mode) -> Vec<Mode> {
-    vec![mode]
+fn alone(mode: Mode) -> Request {
+    checking(vec![mode])
 }
 
-/// The step `mode` runs.
-pub(crate) fn step(mode: Mode) -> Step {
+fn checking(modes: Vec<Mode>) -> Request {
+    Request {
+        modes,
+        crate_readme: CrateReadme::Check,
+    }
+}
+
+/// The step `mode` runs, doing `crate_readme` with the crate's README.
+pub(crate) fn step(mode: Mode, crate_readme: CrateReadme) -> Step {
     match mode {
         Mode::Fmt => Step::Cargo(&["fmt", "--all", "--", "--check"]),
         Mode::Clippy => Step::Cargo(&[
@@ -57,7 +85,7 @@ pub(crate) fn step(mode: Mode) -> Step {
             "warnings",
         ]),
         Mode::Arch => Step::Architecture,
-        Mode::Readme => Step::Readme,
+        Mode::Readme => Step::Readme(crate_readme),
         Mode::Test => Step::Cargo(&["test", "--workspace", "--all-targets", "--locked"]),
         Mode::Doc => Step::Rustdoc(&["doc", "--workspace", "--no-deps", "--locked"]),
         Mode::Deny => Step::Cargo(&["deny", "check"]),

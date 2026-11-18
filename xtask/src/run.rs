@@ -1,4 +1,4 @@
-//! Adapter: runs Cargo from the workspace's root, and reads the files the architecture and README checks read.
+//! Adapter: runs Cargo from the workspace's root, reads the files the architecture and README checks read, and writes the crate's README.
 
 mod sources;
 
@@ -18,6 +18,12 @@ pub(crate) fn root() -> PathBuf {
 /// The text of the file at `path`, from the workspace's root, or the reason the system gave.
 pub(crate) fn text(path: &Path) -> Result<String, String> {
     fs::read_to_string(root().join(path)).map_err(|error| error.to_string())
+}
+
+/// Writes `text` to the file at `path`, from the workspace's root, or gives a sentence with the reason the system gave.
+pub(crate) fn write(path: &Path, text: &str) -> Result<(), String> {
+    fs::write(root().join(path), text)
+        .map_err(|error| format!("{} could not be written: {error}", path.display()))
 }
 
 /// Runs Cargo with `arguments`, and tells whether it succeeded.
