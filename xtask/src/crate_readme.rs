@@ -26,15 +26,6 @@ enum Block {
 }
 
 impl Block {
-    /// The block that `marker`, a line opening one, opens on line `number`.
-    fn opened_by(marker: &str, number: usize) -> Self {
-        if marker == GITHUB_ONLY {
-            Self::GithubOnly(number)
-        } else {
-            Self::SiteOnly(number)
-        }
-    }
-
     /// The number of the line that opened the block, which a shared line has none of.
     fn opened(self) -> Option<usize> {
         match self {
@@ -89,17 +80,17 @@ pub(crate) fn breach(file: &Path, written: Result<String, String>, wanted: &str)
 fn read_line(mut reading: Reading, (at, line): (usize, &str)) -> Reading {
     let number = at + 1;
     match (reading.block, line.trim()) {
-        (Block::Shared, marker @ (GITHUB_ONLY | SITE_ONLY)) => {
-            reading.block = Block::opened_by(marker, number);
-        }
+        (Block::Shared, GITHUB_ONLY) => reading.block = Block::GithubOnly(number),
+        (Block::Shared, SITE_ONLY) => reading.block = Block::SiteOnly(number),
         (Block::GithubOnly(_), END_GITHUB_ONLY) | (Block::SiteOnly(_), END_SITE_ONLY) => {
             reading.block = Block::Shared;
         }
-        (open, marker @ (GITHUB_ONLY | SITE_ONLY)) => reading.problems.push(format!(
-            "README.md opens a {} block on line {number}, inside the {open} block opened on line {}.",
-            Block::opened_by(marker, number),
-            open.opened().unwrap_or_default()
-        )),
+        (open @ (Block::GithubOnly(opened) | Block::SiteOnly(opened)), GITHUB_ONLY) => reading
+            .problems
+            .push(nested(Block::GithubOnly(number), number, open, opened)),
+        (open @ (Block::GithubOnly(opened) | Block::SiteOnly(opened)), SITE_ONLY) => reading
+            .problems
+            .push(nested(Block::SiteOnly(number), number, open, opened)),
         (_, END_GITHUB_ONLY) => reading.problems.push(format!(
             "README.md closes a github-only block on line {number}, where none is open."
         )),
@@ -107,7 +98,7 @@ fn read_line(mut reading: Reading, (at, line): (usize, &str)) -> Reading {
             "README.md closes a site-only block on line {number}, where none is open."
         )),
         (Block::SiteOnly(_), _) if line.contains(END_SITE_ONLY) => reading.problems.push(format!(
-            "README.md has --> on line {number}, inside a site-only block, which would end it early on GitHub."
+            "README.md ends a comment on line {number}, inside a site-only block, which would end the block early on GitHub."
         )),
         (Block::GithubOnly(_), _) => {}
         (_, _) => {
@@ -116,6 +107,13 @@ fn read_line(mut reading: Reading, (at, line): (usize, &str)) -> Reading {
         }
     }
     reading
+}
+
+/// A sentence saying the `inner` block, opened on line `number`, opens inside the `open` block opened on line `opened`.
+fn nested(inner: Block, number: usize, open: Block, opened: usize) -> String {
+    format!(
+        "README.md opens a {inner} block on line {number}, inside the {open} block opened on line {opened}."
+    )
 }
 
 fn unclosed(block: Block) -> Vec<String> {

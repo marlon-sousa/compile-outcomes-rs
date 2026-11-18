@@ -63,7 +63,7 @@ fn awkward_readmes_give_what_a_reader_expects() {
         (
             "--> inside a site-only block",
             "Shared.\n<!-- site-only\nSee <!-- a note --> here.\n-->\n",
-            Err(vec!["README.md has --> on line 3, inside a site-only block, which would end it early on GitHub.".to_owned()]),
+            Err(vec!["README.md ends a comment on line 3, inside a site-only block, which would end the block early on GitHub.".to_owned()]),
         ),
     ];
 
