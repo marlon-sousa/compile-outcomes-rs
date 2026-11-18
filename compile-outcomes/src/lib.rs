@@ -1,21 +1,6 @@
-//! Facade: compiles Rust snippets and reports what the compiler said about each one, without judging.
-//!
-//! compile-outcomes is made for test suites that check what a library tells its users when they misuse it, such as the errors of a procedural macro. Describe a compilation, compile it, and judge each snippet's outcome as the suite sees fit:
-//!
-//! ```no_run
-//! use compile_outcomes::{Compilation, Dependency, Edition, compile};
-//!
-//! let compilation = Compilation::new(Edition::E2021, "target/compile-outcomes")
-//!     .snippets_in("tests/ui")
-//!     .dependency(Dependency::path("greeting", "."));
-//!
-//! let outcomes = compile(&compilation).unwrap();
-//! for (name, outcome) in &outcomes {
-//!     for error in outcome.errors() {
-//!         println!("{name}: {}", error.message);
-//!     }
-//! }
-//! ```
+// Facade: compiles Rust snippets and reports what the compiler said about each one, without judging.
+
+#![doc = include_str!("../README.md")]
 
 mod adapters;
 mod domain;

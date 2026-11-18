@@ -12,7 +12,7 @@ compile-outcomes does input and output, so it has ports: a port is a trait the s
 
 ## The repository
 
-- **`compile-outcomes/`**, the crate users depend on, laid out as the rest of this document describes. Its `tests/` folder holds the Gherkin scenarios: the features, `tests/features/`; their steps, the test target `tests/scenarios/`; and what they compile, `tests/fixtures/`, snippets and two small crates, `greeting` and `broken`, which the workspace excludes.
+- **`compile-outcomes/`**, the crate users depend on, laid out as the rest of this document describes. Its `README.md`, which crates.io shows and `lib.rs` includes as its documentation on docs.rs, is written from the root README by `cargo xtask readme --write`, without the root's `<!-- github-only -->` blocks and with its `<!-- site-only` blocks shown. Its `tests/` folder holds the Gherkin scenarios: the features, `tests/features/`; their steps, the test target `tests/scenarios/`; and what they compile, `tests/fixtures/`, snippets and two small crates, `greeting` and `broken`, which the workspace excludes.
 - **`examples/my_macros/`**, a crate that is never published, holding the README's examples as files: a `#[test]`, a Gherkin feature and its steps, and the snippets they compile. The `test` mode runs them, and the `readme` mode checks that the README shows them as written.
 - **`xtask/`**, the quality gate, `cargo xtask ci`, whose checks CI runs, the tests on Linux, macOS and Windows; [WORKFLOW.md](WORKFLOW.md), section 7, lists them.
 - **`.github/workflows/`**, the CI, pull request, release and weekly workflows, as [WORKFLOW.md](WORKFLOW.md), section 7, lists them, and **`.github/release/`**, the scripts of the release workflow and their fixtures.
@@ -32,7 +32,7 @@ compile-outcomes does input and output, so it has ports: a port is a trait the s
 
 ## Module roles
 
-Every module plays one role, and says which on the first line of its `//!` doc comment, such as `//! Policy: the outcome of every snippet, from what Cargo reported.`
+Every module plays one role, and says which on the first line of its `//!` doc comment, such as `//! Policy: the outcome of every snippet, from what Cargo reported.` compile-outcomes' `lib.rs` is the exception: its documentation is the README, which docs.rs shows as the crate's front page, so it says its role in a plain `//` comment on its first line.
 
 1. **Entity**: data and the invariants it keeps, in `domain/`: the compilation, the snippets and their names, the project, the build report and the outcomes.
 2. **Error**: what keeps a compilation from its outcomes, in `domain/errors.rs`, as "Errors" below describes.
@@ -44,7 +44,7 @@ Every module plays one role, and says which on the first line of its `//!` doc c
 
 A submodule that serves a single module plays its parent's role and says so on its role line.
 
-`xtask/` is a tool, not part of the library, and uses three roles: `main.rs` is its **Handler**, which reads the command line and reports the verdict; the modes, the architecture rules and the README's examples are **Policies**; running Cargo and reading the source files, the README and the files it shows are its **Adapters**. The handler calls both, and neither calls the other.
+`xtask/` is a tool, not part of the library, and uses three roles: `main.rs` is its **Handler**, which reads the command line and reports the verdict; the modes, the architecture rules, the README's examples and the crate's README are **Policies**; running Cargo, reading the source files, the README and the files it shows, and writing the crate's README are its **Adapters**. The handler calls both, and neither calls the other.
 
 Layering goes one way. The facade calls the service with the adapters; the service calls ports and policies; policies use entities and errors; adapters implement ports and use entities and errors, never a policy or the service. No module reaches around another into its internals.
 
