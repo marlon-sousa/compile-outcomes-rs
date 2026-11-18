@@ -21,7 +21,7 @@ The manual for anyone, human or agent, changing compile-outcomes. [docs/WORKFLOW
 8. **Mark agent comments.** A comment an agent writes on GitHub says it is an agent's.
 9. **Check a library before ruling it in or out.** Before saying that a crate or a tool can or cannot do something, read its source or its documentation, including its extension points, at the version we use. For a crate, also read it at the newest release, not yanked, whose `rust-version` is at most ours in `Cargo.toml`: a newer release may do what the one we use cannot. The pull request says what was checked at each version: the file and line, or the documentation page.
 10. **One question at a time.** A question for the maintainer is asked in plain prose, one decision at a time, with the option recommended and why.
-11. **Issues come first.** Every change starts from an agreed issue, except one whose commits, merges aside, are all `test` commits, and its pull request names it, as docs/WORKFLOW.md, section 10, says. Its label says what kind of decision the issue holds. A decision taken outside the issue, such as in a chat, is recorded on it at once.
+11. **Issues come first.** Every change starts from an agreed issue, except one whose commits, merges aside, are all `test` commits and that changes no `Cargo.toml`, and its pull request names it, as docs/WORKFLOW.md, section 10, says. Its label says what kind of decision the issue holds. A decision taken outside the issue, such as in a chat, is recorded on it at once.
 
 ## Reviewing a change
 
@@ -39,7 +39,7 @@ Every pull request is reviewed by an independent reviewer before it is opened, o
 10. Every comment and doc comment, against docs/ARCHITECTURE.md, "Comments".
 11. Every crate the change adds, removes or uses in a new way, and every claim that a library or a tool can or cannot do something, against rule 9 above: it names the source it was checked against at each version, and, for a crate, what the newest release rule 9 names does that the one we use cannot.
 12. Every statement of docs/SPEC.md, docs/ARCHITECTURE.md, docs/WORKFLOW.md and README.md the change makes untrue, which the change updates itself.
-13. The commit messages and the description, against rules 6 and 11 above and docs/WORKFLOW.md: that the description names its issues unless every commit, merges aside, is a `test`, and that the change does what they agreed, no more; for a layer of a stack, that its branch sits on the current tip of the layer below.
+13. The commit messages and the description, against rules 6 and 11 above and docs/WORKFLOW.md: that the description names its issues unless every commit, merges aside, is a `test` and no `Cargo.toml` changes, and that the change does what they agreed, no more; for a layer of a stack, that its branch sits on the current tip of the layer below.
 14. Every pattern the change copies from code already in the repository: the original is reviewed too, against the same items, and what is wrong is reported in both places.
 15. Every input the change accepts, such as a snippet, a dependency, a path or a setting of `Compilation`: whether a test covers the awkward forms a user can write, such as an empty list, a repeated entry, several mistakes at once, or input that comes from a macro or another unusual source. For each form no test covers, the reviewer writes a small probe in its own worktree and reports what it showed, or reports the gap.
 16. The checks under "Building and testing", run at the reviewed revision, without changing the checkout the author works in.
