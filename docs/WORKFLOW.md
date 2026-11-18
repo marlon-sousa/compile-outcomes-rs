@@ -33,7 +33,7 @@ How a change to compile-outcomes travels from an issue to `main`. [AGENTS.md](..
 
 ### Naming the issue
 
-Every pull request names an open issue of this repository, as section 10 says, unless every one of its commits, merges aside, is a `test` and it changes no `Cargo.toml`: `Closes #N` when it finishes the issue, `Refs #N` when it does part of it. The layers of a stack each say `Refs #N`, and the top one also says `Closes #N` once it targets `main`: GitHub links a closing keyword only on a pull request into the default branch, so before that the check finds only `Refs #N`. A pull request doing the work of several issues names each of them. A pull request never closes an issue of another repository, which GitHub would close the moment it merged, before that repository's own work.
+Every pull request names an open issue of this repository, as section 10 says, unless every one of its commits, merges aside, is a `test` and it changes no `Cargo.toml` or `Cargo.lock`: `Closes #N` when it finishes the issue, `Refs #N` when it does part of it. The layers of a stack each say `Refs #N`, and the top one also says `Closes #N` once it targets `main`: GitHub links a closing keyword only on a pull request into the default branch, so before that the check finds only `Refs #N`. A pull request doing the work of several issues names each of them. A pull request never closes an issue of another repository, which GitHub would close the moment it merged, before that repository's own work.
 
 ## 4. Stacked pull requests
 
@@ -50,7 +50,7 @@ Each pull request does one thing and stays small, ideally under 300 lines of cod
 
 A pull request is ready to merge when:
 
-- [ ] The description names its open issues, with `Closes #N` or `Refs #N`, unless every commit, merges aside, is a `test` and no `Cargo.toml` changes.
+- [ ] The description names its open issues, with `Closes #N` or `Refs #N`, unless every commit, merges aside, is a `test` and no `Cargo.toml` or `Cargo.lock` changes.
 - [ ] `cargo xtask ci` passes locally.
 - [ ] Every behaviour has its scenario, and every fixed bug its regression test, as AGENTS.md, "Rules", asks.
 - [ ] Every check of the CI and pull request workflows passes, and of the release workflow when the change alters how releases are made, including the tests on Linux, macOS and Windows and on the minimum supported Rust.
@@ -81,7 +81,7 @@ A pull request is ready to merge when:
 Every action a workflow uses is pinned to a commit, with its version in a comment beside it.
 
 - **`.github/workflows/ci.yml`**, on every pull request, the layers of a stack included, and every push to `main`: each mode of `cargo xtask ci` in a job of its own on Linux, the `test` mode on Linux, macOS and Windows, and the `test` mode again with the minimum supported Rust.
-- **`.github/workflows/pull-request.yml`**, on every pull request, whatever its base: the description names an open issue of this repository, unless every commit other than a merge is a `test` and no `Cargo.toml` changes, and closes none of another, with the `pr-has-issue` and `no-cross-repo-closing` actions of itinera-dev/actions; every commit message keeps the convention of section 3; and the description has no unticked checkbox. Ticking a checkbox runs only this workflow again.
+- **`.github/workflows/pull-request.yml`**, on every pull request, whatever its base: the description names an open issue of this repository, unless every commit other than a merge is a `test` and no `Cargo.toml` or `Cargo.lock` changes, and closes none of another, with the `pr-has-issue` and `no-cross-repo-closing` actions of itinera-dev/actions; every commit message keeps the convention of section 3; and the description has no unticked checkbox. Ticking a checkbox runs only this workflow again.
 - **`.github/workflows/release.yml`**, on a tag `v<version>`, and on a pull request that changes how releases are made: section 9 describes it.
 - **`.github/workflows/weekly.yml`**, each Monday: the `test` mode on Rust beta, so that a change in the next Rust that breaks compile-outcomes, such as a change to the messages Cargo writes, is known before it is released.
 
@@ -128,7 +128,7 @@ Trusted publishing is set up on a crate that already exists on crates.io, so the
 
 Every change starts as an issue, and is agreed there before any code is written: building the wrong thing is the expensive mistake, and the issue is the cheapest place to find it. The issues are also the record of every decision taken about compile-outcomes, what it does and how it is built and released, so that a decision can be found again by its kind.
 
-The one exception is a change whose commits, merges aside, are all `test` commits and that changes no `Cargo.toml`. It changes neither what compile-outcomes does nor how its code is organised or released, so it holds no decision of its own: what it checks was agreed already. A test that needs a new dependency, even one used only by tests, is not that exception: choosing a crate is an `architecture` decision, which starts from its issue. The pull request workflow asks for an issue whenever a `Cargo.toml` changes.
+The one exception is a change whose commits, merges aside, are all `test` commits and that changes no `Cargo.toml` or `Cargo.lock`. It changes neither what compile-outcomes does nor how its code is organised or released, so it holds no decision of its own: what it checks was agreed already. A test that needs a new dependency or another version of one, even one used only by tests, is not that exception: choosing a crate is an `architecture` decision, which starts from its issue. The pull request workflow asks for an issue whenever a `Cargo.toml` or a `Cargo.lock` changes, renamed or removed ones included.
 
 - **A feature** says what is wanted and why, and what it must not break. It can be short; the details are worked out in the issue.
 - **A bug** says what happened, what was expected, and the smallest snippet or compilation that shows it.
@@ -136,7 +136,7 @@ The one exception is a change whose commits, merges aside, are all `test` commit
 - **Labels:** each issue carries one label, which says what kind of decision it holds, so that decisions can be found again:
   - `feature`, something new a user meets;
   - `bug`, something a user meets that is wrong;
-  - `architecture`, how the code is organised or written, refactors included, and the rules on code of docs/ARCHITECTURE.md and AGENTS.md;
+  - `architecture`, how the code is organised or written, refactors and the choice of dependencies included, and the rules on code of docs/ARCHITECTURE.md and AGENTS.md;
   - `process`, CI, this workflow, releases, and the process rules and review checklist of AGENTS.md;
   - `docs`, the documentation a user reads, such as README.md.
 
