@@ -3,7 +3,7 @@
 use std::env;
 use std::fs;
 
-use compile_outcomes::{Diagnostic, Errors, Location, Outcome, Outcomes};
+use compile_outcomes::{Errors, Outcome, Outcomes};
 use cucumber::gherkin::Step;
 use cucumber::then;
 use toml::{Table, Value};
@@ -25,7 +25,7 @@ impl Compiling {
         }
     }
 
-    fn outcome(&self, snippet: &str) -> &Outcome {
+    pub(super) fn outcome(&self, snippet: &str) -> &Outcome {
         self.outcomes()
             .get(snippet)
             .unwrap_or_else(|| panic!("no outcome for {snippet}"))
@@ -35,18 +35,6 @@ impl Compiling {
 fn docstring(step: &Step) -> Vec<&str> {
     let text = step.docstring.as_deref().expect("the step has a docstring");
     text.trim().lines().map(str::trim).collect()
-}
-
-fn line_and_column(location: &Location) -> (usize, usize) {
-    (location.line, location.column)
-}
-
-/// Whether `diagnostic` says `message`, with `code`, pointing at `line` and `column`.
-fn says(diagnostic: &Diagnostic, message: &str, code: &str, line: usize, column: usize) -> bool {
-    let at = diagnostic.location.as_ref().map(line_and_column);
-    diagnostic.message == message
-        && diagnostic.code.as_deref() == Some(code)
-        && at == Some((line, column))
 }
 
 #[then(expr = "the snippet {string} compiled")]
@@ -64,42 +52,6 @@ fn failed(world: &mut Compiling, snippet: String) {
 #[then(expr = "the snippet {string} has no warnings")]
 fn no_warnings(world: &mut Compiling, snippet: String) {
     assert_eq!(world.outcome(&snippet).warnings(), []);
-}
-
-#[then(
-    expr = "the snippet {string} has the warning {string} with the code {string} at line {int}, column {int}"
-)]
-fn the_warning(
-    world: &mut Compiling,
-    snippet: String,
-    message: String,
-    code: String,
-    line: usize,
-    column: usize,
-) {
-    let warnings = world.outcome(&snippet).warnings();
-    let found = warnings
-        .iter()
-        .any(|warning| says(warning, &message, &code, line, column));
-    assert!(found, "{warnings:#?}");
-}
-
-#[then(
-    expr = "the snippet {string} has the error {string} with the code {string} at line {int}, column {int}"
-)]
-fn the_error(
-    world: &mut Compiling,
-    snippet: String,
-    message: String,
-    code: String,
-    line: usize,
-    column: usize,
-) {
-    let errors = world.outcome(&snippet).errors();
-    let found = errors
-        .iter()
-        .any(|error| says(error, &message, &code, line, column));
-    assert!(found, "{errors:#?}");
 }
 
 #[then(expr = "the errors of the snippet {string} are, in order:")]

@@ -26,11 +26,14 @@ pub(crate) fn compile(
     let snippets = described(naming::snippets(found), lockfile)?;
     let project = project::project(compilation, &snippets);
     untouched_unless_owned(&project, compilation.build(), disk)?;
+    if compilation.tool().is_clippy() {
+        cargo.clippy_installed()?;
+    }
     disk.write(&project)?;
     if compilation.build().is_clean() {
         cargo.clean(&project)?;
     }
-    let report = cargo.build(&project)?;
+    let report = cargo.build(&project, compilation.tool())?;
     Ok(outcomes::outcomes(&snippets, report)?)
 }
 

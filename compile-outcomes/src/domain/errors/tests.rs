@@ -79,6 +79,13 @@ fn every_error_reads_as_a_sentence_naming_what_it_is_about() {
             "Cargo, run as cargo, could not be started: No such file or directory (os error 2)",
         ),
         (
+            Error::ClippyNotInstalled {
+                program: PathBuf::from("cargo"),
+                output: "error: no such command: `clippy`".to_owned(),
+            },
+            "Clippy is not installed for the toolchain of cargo. Install it with rustup component add clippy. Cargo wrote: error: no such command: `clippy`",
+        ),
+        (
             Error::CargoStopped {
                 output: "error: no matching package named `greting` found".to_owned(),
             },

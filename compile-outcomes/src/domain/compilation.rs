@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use getset::{CopyGetters, Getters};
 use strum::EnumIs;
 
-use crate::domain::{Dependency, Edition};
+use crate::domain::{Clippy, Dependency, Edition};
 
 /// The description of one compilation: its snippets, the dependencies they share and the edition they are compiled with.
 ///
@@ -24,6 +24,8 @@ pub struct Compilation {
     lockfile_path: Option<PathBuf>,
     #[getset(get_copy = "pub(crate)")]
     build: Build,
+    #[getset(get = "pub(crate)")]
+    tool: Tool,
 }
 
 /// Whether a compilation reuses the build output an earlier one left, or removes it first.
@@ -31,6 +33,13 @@ pub struct Compilation {
 pub(crate) enum Build {
     Reusing,
     Clean,
+}
+
+/// Whether a compilation builds the snippets with a plain `cargo build`, or lints them with `cargo clippy`.
+#[derive(Debug, Clone, PartialEq, Eq, EnumIs)]
+pub(crate) enum Tool {
+    Build,
+    Clippy(Clippy),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -51,6 +60,7 @@ impl Compilation {
             dependencies: Vec::new(),
             lockfile_path: None,
             build: Build::Reusing,
+            tool: Tool::Build,
         }
     }
 
@@ -90,6 +100,15 @@ impl Compilation {
     #[must_use]
     pub fn clean_build(mut self) -> Self {
         self.build = Build::Clean;
+        self
+    }
+
+    /// Compiles the snippets with `cargo clippy` instead of `cargo build`, with the lint levels of `clippy`, so that clippy's lints are reported with the compiler's messages.
+    ///
+    /// Calling it again replaces the earlier `clippy`. Compiling refuses with [`Error::ClippyNotInstalled`](crate::Error::ClippyNotInstalled) when clippy is not installed for the toolchain.
+    #[must_use]
+    pub fn clippy(mut self, clippy: Clippy) -> Self {
+        self.tool = Tool::Clippy(clippy);
         self
     }
 }

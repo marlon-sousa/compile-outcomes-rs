@@ -2,9 +2,9 @@
 
 What compile-outcomes does, accepts and refuses. [ARCHITECTURE.md](ARCHITECTURE.md) says how the code that does it is organised; [AGENTS.md](../AGENTS.md) says how a change is made. Code does what this document says, no more and no less, and a change to what it does starts here.
 
-## 0. What ships in 0.1.0
+## 0. What ships in 0.1
 
-Everything this document describes outside this section ships in 0.1.0. What a later version may add, such as snippets compiled as binaries or a time limit, is planned in the repository's [open issues labelled `feature`](https://github.com/marlon-sousa/compile-outcomes-rs/issues?q=is%3Aissue%20is%3Aopen%20label%3Afeature), each saying what it must not break here. A feature is written into this document in the pull request that builds it.
+Everything this document describes outside this section ships in 0.1.0, except `.clippy(...)`, which ships in 0.1.3. What a later version may add, such as snippets compiled as binaries or a time limit, is planned in the repository's [open issues labelled `feature`](https://github.com/marlon-sousa/compile-outcomes-rs/issues?q=is%3Aissue%20is%3Aopen%20label%3Afeature), each saying what it must not break here. A feature is written into this document in the pull request that builds it.
 
 ## 1. Purpose
 
@@ -26,6 +26,12 @@ A `Compilation` describes one compilation. It is built step by step, and each st
    - `.without_default_features()` turns its default features off.
 5. `.lockfile(path)` copies that `Cargo.lock` into the project before building, so that the dependencies resolve to the versions it holds, such as those of the caller's own workspace. Cargo still updates the copy where it must, and the original is never written.
 6. `.clean_build()` has Cargo clean the build output before building, so that every crate compiles again, dependencies included, as after `cargo clean`.
+7. `.clippy(clippy)` compiles the snippets with clippy instead of a plain build, so that clippy's lints are reported with the compiler's, as §4, rule 3, says. `clippy` is a `Clippy`, built step by step like the compilation:
+   - `Clippy::new()` keeps clippy's own lint levels, those its documentation gives each lint;
+   - `.allow(group)`, `.warn(group)` and `.deny(group)` set the level of every lint of a `Group`: `All`, `Correctness`, `Suspicious`, `Style`, `Complexity`, `Perf`, `Pedantic`, `Restriction`, `Nursery` or `Cargo`, clippy's groups `clippy::all` to `clippy::cargo`;
+   - `.allow_lint(name)`, `.warn_lint(name)` and `.deny_lint(name)` set the level of one lint, named as clippy's documentation lists it, such as `unwrap_used`, with or without `clippy::` before it.
+
+   The levels apply to every snippet, in the order they were set, so a later one overrides an earlier one for the lints both cover, as with clippy's own `-W` and `-D` flags. A snippet still sets levels of its own with attributes, such as `#![warn(clippy::pedantic)]`, which override those of `Clippy`. Which lints exist is the clippy that runs to say: a name it does not know is passed all the same, with `clippy::` before it, and clippy reports it in every snippet with a warning of its own, `unknown lint`, of code `E0602`, which points nowhere. Calling `.clippy` again replaces the earlier `Clippy`.
 
 Describing a compilation touches nothing on disk; only compiling it does.
 
@@ -46,8 +52,10 @@ A relative path, whether of a snippet, a folder, a dependency, the lockfile or t
 1. It writes the generated workspace to `work_dir/project`, replacing whatever an earlier compilation left there, and copies the lockfile into it when one was given. It also writes there an empty file, `.owned-by-compile-outcomes`, which marks the folder as its own. It replaces the folder only when it is missing, empty or marked: a folder holding files without the mark is left untouched, so that a folder that was never compile-outcomes' is never deleted. Creating that file in such a folder hands it over, to be replaced. This folder and the target folder below each count as empty when they hold no file at any depth, only folders or nothing: nothing in them can be lost. A CI cache can leave such a folder, as `Swatinem/rust-cache` does, which keeps most folders under `target/` and removes their files, compile-outcomes' mark included.
 2. With `.clean_build()`, it then runs `cargo clean --color=never` there, with the target folder `work_dir/target`, which removes that folder and the build folder the user's Cargo configuration names, if any. Cargo writes a file named `CACHEDIR.TAG` into a target folder when it makes it, and the target folder is cleaned only when it is missing, empty or holds that file: one holding files without it is left untouched, and the compilation refused, so that a folder that was never Cargo's is never deleted. Both folders are checked before either is changed.
 3. It runs `cargo build --workspace --keep-going --message-format=json --color=never` there, with the target folder `work_dir/target`. `--keep-going` lets every snippet compile even when an earlier one failed, and `--color=never` keeps what Cargo writes free of terminal colour codes, which a screen reader would read aloud.
+
+   With `.clippy(...)`, it runs `cargo clippy --version` before writing or cleaning anything, to learn that clippy is installed, and then `cargo clippy` in place of `cargo build`, with the same arguments, followed by `--` and a flag for each level of the `Clippy`, in its order: `-A`, `-W` or `-D`, then the group or lint with `clippy::` before it. Clippy lints only the snippets, never their dependencies. Its lints are diagnostics like the compiler's, of level warning or error as their level says, with their lint as their `code`, such as `clippy::arc_with_non_send_sync`; a lint of level deny makes its snippet fail.
 4. It runs the `cargo` the `CARGO` environment variable names, which Cargo sets for the tests and build scripts it runs, so a suite compiles its snippets with its own toolchain; otherwise the `cargo` found on the `PATH`.
-5. Cargo works as configured for the user: its network access, its registries and its environment variables apply.
+5. Cargo works as configured for the user: its network access, its registries and its environment variables apply. So does clippy's: with `.clippy(...)`, the `clippy.toml` or `.clippy.toml` clippy finds in the folder `CLIPPY_CONF_DIR` names, or else in the snippet's package folder or the nearest folder above it, applies to the snippets, as it does to the user's own code. A `work_dir` inside the user's repository takes the repository's `clippy.toml`.
 
 ## 5. Outcomes
 
@@ -78,6 +86,7 @@ A relative path, whether of a snippet, a folder, a dependency, the lockfile or t
    - the project, or the copy of the lockfile, cannot be written, naming what could not be written, with the reason the system gave;
    - for a clean build, the target folder cannot be read, or Cargo cannot clean it, naming the folder, with the reason the system gave or what Cargo wrote to its error output;
    - Cargo cannot be started, naming the program run, with the reason the system gave;
+   - with `.clippy(...)`, `cargo clippy --version` fails, saying that clippy is not installed for the toolchain of the program run and to install it with `rustup component add clippy`, with what Cargo wrote to its error output;
    - Cargo stops without building any snippet and without a compiler message, such as when a dependency cannot be found or resolved, with what it wrote to its error output;
    - a dependency fails to compile, naming it, with its errors;
    - Cargo finishes without an outcome for a snippet, naming it.

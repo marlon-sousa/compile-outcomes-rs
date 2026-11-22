@@ -129,6 +129,19 @@ pub enum Error {
         reason: String,
     },
 
+    /// Clippy was asked for, and `cargo clippy --version` failed.
+    #[error(
+        "Clippy is not installed for the toolchain of {}. Install it with rustup component add clippy. Cargo wrote: {output}",
+        .program.display()
+    )]
+    #[non_exhaustive]
+    ClippyNotInstalled {
+        /// The program run, as the `CARGO` environment variable named it, or `cargo`.
+        program: PathBuf,
+        /// What Cargo wrote to its error output.
+        output: String,
+    },
+
     /// Cargo stopped without building any snippet and without a compiler message.
     #[error("Cargo stopped before compiling any snippet, and wrote: {output}")]
     #[non_exhaustive]

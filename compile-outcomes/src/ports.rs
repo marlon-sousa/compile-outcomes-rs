@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-use crate::domain::{BuildReport, Error, Project};
+use crate::domain::{BuildReport, Error, Project, Tool};
 
 /// The disk: the snippet files and folders a compilation names, and the project it writes.
 pub(crate) trait Disk {
@@ -23,9 +23,11 @@ pub(crate) trait Disk {
     fn write(&self, project: &Project) -> Result<(), Error>;
 }
 
-/// Cargo, which cleans a project's build output, and builds the project and reports what the compiler said.
+/// Cargo, which learns whether clippy is installed, cleans a project's build output, and builds the project with a tool and reports what the compiler said.
 pub(crate) trait Cargo {
+    fn clippy_installed(&self) -> Result<(), Error>;
+
     fn clean(&self, project: &Project) -> Result<(), Error>;
 
-    fn build(&self, project: &Project) -> Result<BuildReport, Error>;
+    fn build(&self, project: &Project, tool: &Tool) -> Result<BuildReport, Error>;
 }

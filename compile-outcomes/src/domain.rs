@@ -1,6 +1,7 @@
 //! Entity: what a compilation is made of, what it reports about each snippet, and what keeps it from reporting.
 
 mod build_report;
+mod clippy;
 mod compilation;
 mod dependency;
 mod diagnostic;
@@ -14,8 +15,10 @@ mod snippet;
 mod snippet_name;
 
 pub(crate) use build_report::{BuildReport, CompilerMessage, Level};
+pub use clippy::{Clippy, Group};
+pub(crate) use clippy::{LintLevel, Lints, Setting};
 pub use compilation::Compilation;
-pub(crate) use compilation::{Build, SnippetSource};
+pub(crate) use compilation::{Build, SnippetSource, Tool};
 pub use dependency::Dependency;
 pub(crate) use dependency::Source;
 pub use diagnostic::{Diagnostic, Location};

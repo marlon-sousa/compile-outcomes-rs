@@ -1,5 +1,7 @@
 //! The steps of the scenarios, and the compilation they describe.
 
+mod clippy;
+mod diagnostics;
 mod folders;
 mod given;
 mod then;

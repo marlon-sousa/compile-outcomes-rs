@@ -2,6 +2,15 @@
 
 Every release of compile-outcomes. Each section is written in the release's pull request, from the changelog entries its commits carry as trailers, as [docs/WORKFLOW.md](docs/WORKFLOW.md), "Releases", describes, and becomes the notes of its [GitHub release](https://github.com/marlon-sousa/compile-outcomes-rs/releases). Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.3]
+
+Nothing that worked in 0.1 changes: code written for 0.1.2 compiles unchanged.
+
+### Added
+
+- `Compilation::clippy`, which compiles the snippets with `cargo clippy` instead of `cargo build`, and reports clippy's lints as warnings, or as errors for a denied lint, each with its lint as its code, such as `clippy::let_and_return`. `Clippy` sets the lint levels of clippy's groups, a `Group` such as `Group::Pedantic`, and of single lints by name, in order. Clippy lints only the snippets, never their dependencies, and the `clippy.toml` above the work folder applies to them, as to your own code.
+- `Error::ClippyNotInstalled`, which refuses a compilation with clippy when clippy is not installed for the toolchain, saying how to install it.
+
 ## [0.1.2]
 
 ### Changed
