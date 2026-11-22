@@ -1,15 +1,14 @@
 //! Adapter (Cargo): the arguments that hand clippy the lint levels of a `Clippy`, after `--`.
 
+use std::iter::once;
+
 use crate::domain::{Clippy, LintLevel, Lints, Setting};
 
-/// `--`, then a flag and a lint for each setting, in order, or nothing for clippy's own levels.
+/// `--`, then a flag and a lint for each setting, in order.
 pub(super) fn flags(clippy: &Clippy) -> Vec<String> {
-    let settings = clippy.settings();
-    if settings.is_empty() {
-        return Vec::new();
-    }
-    let separator = std::iter::once("--".to_owned());
-    separator.chain(settings.iter().flat_map(setting)).collect()
+    once("--".to_owned())
+        .chain(clippy.settings().iter().flat_map(setting))
+        .collect()
 }
 
 fn setting(setting: &Setting) -> [String; 2] {
@@ -20,7 +19,7 @@ fn setting(setting: &Setting) -> [String; 2] {
     };
     let lints = match &setting.lints {
         Lints::Group(group) => group.to_string(),
-        Lints::One(name) => name.clone(),
+        Lints::One(name) => name.to_string(),
     };
     [flag.to_owned(), format!("clippy::{lints}")]
 }

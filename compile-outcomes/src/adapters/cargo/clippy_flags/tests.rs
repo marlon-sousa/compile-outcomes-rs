@@ -2,8 +2,8 @@ use super::flags;
 use crate::domain::{Clippy, Group};
 
 #[test]
-fn clippys_own_levels_pass_no_flag() {
-    assert!(flags(&Clippy::new()).is_empty());
+fn clippys_own_levels_pass_only_the_separator() {
+    assert_eq!(flags(&Clippy::new()), ["--"]);
 }
 
 #[test]

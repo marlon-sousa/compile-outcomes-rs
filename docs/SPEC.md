@@ -31,7 +31,7 @@ A `Compilation` describes one compilation. It is built step by step, and each st
    - `.allow(group)`, `.warn(group)` and `.deny(group)` set the level of every lint of a `Group`: `All`, `Correctness`, `Suspicious`, `Style`, `Complexity`, `Perf`, `Pedantic`, `Restriction`, `Nursery` or `Cargo`, clippy's groups `clippy::all` to `clippy::cargo`;
    - `.allow_lint(name)`, `.warn_lint(name)` and `.deny_lint(name)` set the level of one lint, named as clippy's documentation lists it, such as `unwrap_used`, with or without `clippy::` before it.
 
-   The levels apply to every snippet, in the order they were set, so a later one overrides an earlier one for the lints both cover, as with clippy's own `-W` and `-D` flags. A snippet still sets levels of its own with attributes, such as `#![warn(clippy::pedantic)]`, which override those of `Clippy`. Which lints exist is the clippy that runs to say: a name it does not know is passed as given, and clippy reports it in every snippet with a warning of its own, `unknown lint`, of code `E0602`, which points nowhere. Calling `.clippy` again replaces the earlier `Clippy`.
+   The levels apply to every snippet, in the order they were set, so a later one overrides an earlier one for the lints both cover, as with clippy's own `-W` and `-D` flags. A snippet still sets levels of its own with attributes, such as `#![warn(clippy::pedantic)]`, which override those of `Clippy`. Which lints exist is the clippy that runs to say: a name it does not know is passed all the same, with `clippy::` before it, and clippy reports it in every snippet with a warning of its own, `unknown lint`, of code `E0602`, which points nowhere. Calling `.clippy` again replaces the earlier `Clippy`.
 
 Describing a compilation touches nothing on disk; only compiling it does.
 
@@ -55,7 +55,7 @@ A relative path, whether of a snippet, a folder, a dependency, the lockfile or t
 
    With `.clippy(...)`, it runs `cargo clippy --version` before writing or cleaning anything, to learn that clippy is installed, and then `cargo clippy` in place of `cargo build`, with the same arguments, followed by `--` and a flag for each level of the `Clippy`, in its order: `-A`, `-W` or `-D`, then the group or lint with `clippy::` before it. Clippy lints only the snippets, never their dependencies. Its lints are diagnostics like the compiler's, of level warning or error as their level says, with their lint as their `code`, such as `clippy::arc_with_non_send_sync`; a lint of level deny makes its snippet fail.
 4. It runs the `cargo` the `CARGO` environment variable names, which Cargo sets for the tests and build scripts it runs, so a suite compiles its snippets with its own toolchain; otherwise the `cargo` found on the `PATH`.
-5. Cargo works as configured for the user: its network access, its registries and its environment variables apply.
+5. Cargo works as configured for the user: its network access, its registries and its environment variables apply. So does clippy's: with `.clippy(...)`, the `clippy.toml` or `.clippy.toml` clippy finds in the folder `CLIPPY_CONF_DIR` names, or else in the project's folder or the nearest folder above it, applies to the snippets, as it does to the user's own code. A `work_dir` inside the user's repository takes the repository's `clippy.toml`.
 
 ## 5. Outcomes
 

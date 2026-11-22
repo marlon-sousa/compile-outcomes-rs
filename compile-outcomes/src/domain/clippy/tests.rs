@@ -1,4 +1,4 @@
-use super::{Clippy, Group, LintLevel, Lints, Setting};
+use super::{Clippy, Group, LintLevel, LintName, Lints, Setting};
 
 fn group(level: LintLevel, group: Group) -> Setting {
     Setting {
@@ -10,7 +10,7 @@ fn group(level: LintLevel, group: Group) -> Setting {
 fn one(level: LintLevel, name: &str) -> Setting {
     Setting {
         level,
-        lints: Lints::One(name.to_owned()),
+        lints: Lints::One(LintName::given(name.to_owned())),
     }
 }
 
@@ -40,38 +40,4 @@ fn levels_keep_the_order_they_were_set() {
             one(LintLevel::Deny, "let_and_return"),
         ]
     );
-}
-
-#[test]
-fn a_lint_is_named_alike_with_or_without_clippy_before_it() {
-    let cases = [
-        ("unwrap_used", "unwrap_used"),
-        ("clippy::unwrap_used", "unwrap_used"),
-        ("clippy::clippy::x", "clippy::x"),
-        ("", ""),
-        ("clippy::", ""),
-    ];
-    for (given, kept) in cases {
-        let clippy = Clippy::new().deny_lint(given);
-        assert_eq!(*clippy.settings(), [one(LintLevel::Deny, kept)], "{given}");
-    }
-}
-
-#[test]
-fn a_group_displays_as_clippy_names_it() {
-    let cases = [
-        (Group::All, "all"),
-        (Group::Correctness, "correctness"),
-        (Group::Suspicious, "suspicious"),
-        (Group::Style, "style"),
-        (Group::Complexity, "complexity"),
-        (Group::Perf, "perf"),
-        (Group::Pedantic, "pedantic"),
-        (Group::Restriction, "restriction"),
-        (Group::Nursery, "nursery"),
-        (Group::Cargo, "cargo"),
-    ];
-    for (group, name) in cases {
-        assert_eq!(group.to_string(), name);
-    }
 }

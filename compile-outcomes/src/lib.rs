@@ -18,7 +18,7 @@ use adapters::{CargoProcess, FileSystem};
 
 /// Compiles every snippet of `compilation` and returns the outcome of each, or the errors that kept it from them.
 ///
-/// It writes the project to `work_dir/project`, then runs `cargo build --workspace --keep-going --message-format=json --color=never` there, with `work_dir/target` as the target folder, or `cargo clippy` with the same arguments for a compilation given [`Compilation::clippy`]. A snippet that fails to compile is an outcome, never an error.
+/// It writes the project to `work_dir/project`, then runs `cargo build --workspace --keep-going --message-format=json --color=never` there, with `work_dir/target` as the target folder, or, for a compilation given [`Compilation::clippy`], `cargo clippy` with the same arguments, then `--` and a flag for each of its lint levels, after checking with `cargo clippy --version` that clippy is installed. A snippet that fails to compile is an outcome, never an error.
 ///
 /// It runs the `cargo` the `CARGO` environment variable names, which Cargo sets for the tests it runs, otherwise the one on the `PATH`.
 ///

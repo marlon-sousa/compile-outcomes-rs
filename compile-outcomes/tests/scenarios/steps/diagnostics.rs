@@ -35,12 +35,21 @@ fn the_warning(
     assert!(found, "{warnings:#?}");
 }
 
-#[then(expr = "the snippet {string} has the warning {string} with the code {string}")]
-fn the_warning_anywhere(world: &mut Compiling, snippet: String, message: String, code: String) {
+/// Whether `diagnostic` says `message`, with `code`, pointing nowhere.
+fn says_nowhere(diagnostic: &Diagnostic, message: &str, code: &str) -> bool {
+    diagnostic.message == message
+        && diagnostic.code.as_deref() == Some(code)
+        && diagnostic.location.is_none()
+}
+
+#[then(
+    expr = "the snippet {string} has the warning {string} with the code {string}, pointing nowhere"
+)]
+fn the_warning_nowhere(world: &mut Compiling, snippet: String, message: String, code: String) {
     let warnings = world.outcome(&snippet).warnings();
-    let found = warnings.iter().any(|warning| {
-        warning.message == message && warning.code.as_deref() == Some(code.as_str())
-    });
+    let found = warnings
+        .iter()
+        .any(|warning| says_nowhere(warning, &message, &code));
     assert!(found, "{warnings:#?}");
 }
 

@@ -6,7 +6,7 @@ use crate::domain::{Clippy, Error, Group, Tool};
 use crate::use_cases::compile::compile;
 
 #[test]
-fn clippy_is_checked_before_the_project_is_written_then_builds_the_project() {
+fn a_compilation_with_clippy_checks_for_it_then_builds_with_it() {
     let disk = FakeDisk::default();
     let cargo = FakeCargo {
         built: vec!["snippet_a".to_owned()],
@@ -57,4 +57,25 @@ fn clippy_that_is_not_installed_is_reported_alone_before_anything_is_written_or_
     );
     assert!(disk.written.borrow().is_empty());
     assert_eq!(*cargo.steps.borrow(), [Step::CheckClippy]);
+}
+
+#[test]
+fn a_clean_build_with_clippy_checks_for_it_then_cleans_then_builds_with_it() {
+    let disk = FakeDisk::default();
+    let cargo = FakeCargo {
+        built: vec!["snippet_a".to_owned()],
+        ..FakeCargo::default()
+    };
+
+    let compilation = compilation().clean_build().clippy(Clippy::new());
+    compile(&compilation, &disk, &cargo).unwrap();
+
+    assert_eq!(
+        *cargo.steps.borrow(),
+        [
+            Step::CheckClippy,
+            Step::Clean,
+            Step::Build(Tool::Clippy(Clippy::new()))
+        ]
+    );
 }

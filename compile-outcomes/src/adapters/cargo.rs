@@ -58,7 +58,7 @@ impl Cargo for CargoProcess {
             Tool::Build => run(project, "build", &args)?,
             Tool::Clippy(clippy) => {
                 let flags = clippy_flags::flags(clippy);
-                run(project, "clippy", &[&args[..], &flags].concat())?
+                run(project, "clippy", &[args.as_slice(), &flags].concat())?
             }
         };
         let error_output = String::from_utf8_lossy(&output.stderr).into_owned();

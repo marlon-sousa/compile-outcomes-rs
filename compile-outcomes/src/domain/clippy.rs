@@ -1,7 +1,12 @@
 //! Entity: the lint levels clippy compiles the snippets with.
 
-use derive_more::Display;
+mod group;
+mod lint_name;
+
 use getset::Getters;
+
+pub use group::Group;
+pub(crate) use lint_name::LintName;
 
 /// The lint levels clippy compiles every snippet with, built step by step and given to [`Compilation::clippy`](crate::Compilation::clippy).
 ///
@@ -20,35 +25,6 @@ pub struct Clippy {
     settings: Vec<Setting>,
 }
 
-/// A group of clippy's lints, as clippy names it after `clippy::`.
-///
-/// Displayed as clippy names it, such as `pedantic`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Display)]
-#[display(rename_all = "lowercase")]
-#[non_exhaustive]
-pub enum Group {
-    /// `clippy::all`, every lint clippy warns on or denies by default.
-    All,
-    /// `clippy::correctness`, code that is outright wrong.
-    Correctness,
-    /// `clippy::suspicious`, code that is most likely wrong.
-    Suspicious,
-    /// `clippy::style`, code that could be written more idiomatically.
-    Style,
-    /// `clippy::complexity`, code that does something simple in a complex way.
-    Complexity,
-    /// `clippy::perf`, code that could run faster.
-    Perf,
-    /// `clippy::pedantic`, strict lints, with occasional false positives.
-    Pedantic,
-    /// `clippy::restriction`, lints that forbid language features, for some code bases.
-    Restriction,
-    /// `clippy::nursery`, lints still being developed.
-    Nursery,
-    /// `clippy::cargo`, lints about the package's manifest.
-    Cargo,
-}
-
 /// One setting of a [`Clippy`]: whether the lints it covers are allowed, warned on or denied.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct Setting {
@@ -63,11 +39,11 @@ pub(crate) enum LintLevel {
     Deny,
 }
 
-/// The lints a level covers: a group, or one lint by its name without `clippy::`.
+/// The lints a level covers: a group, or one lint.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum Lints {
     Group(Group),
-    One(String),
+    One(LintName),
 }
 
 impl Clippy {
@@ -97,31 +73,24 @@ impl Clippy {
     /// Allows the lint `name`, such as `unwrap_used`, with or without `clippy::` before it.
     #[must_use]
     pub fn allow_lint(self, name: impl Into<String>) -> Self {
-        self.set(LintLevel::Allow, one(name.into()))
+        self.set(LintLevel::Allow, Lints::One(LintName::given(name.into())))
     }
 
     /// Warns on the lint `name`, such as `unwrap_used`, with or without `clippy::` before it.
     #[must_use]
     pub fn warn_lint(self, name: impl Into<String>) -> Self {
-        self.set(LintLevel::Warn, one(name.into()))
+        self.set(LintLevel::Warn, Lints::One(LintName::given(name.into())))
     }
 
     /// Denies the lint `name`, such as `unwrap_used`, with or without `clippy::` before it, so that a snippet it fires on fails.
     #[must_use]
     pub fn deny_lint(self, name: impl Into<String>) -> Self {
-        self.set(LintLevel::Deny, one(name.into()))
+        self.set(LintLevel::Deny, Lints::One(LintName::given(name.into())))
     }
 
     fn set(mut self, level: LintLevel, lints: Lints) -> Self {
         self.settings.push(Setting { level, lints });
         self
-    }
-}
-
-fn one(name: String) -> Lints {
-    match name.strip_prefix("clippy::") {
-        Some(bare) => Lints::One(bare.to_owned()),
-        None => Lints::One(name),
     }
 }
 
