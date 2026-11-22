@@ -27,19 +27,19 @@ compile-outcomes does input and output, so it has ports: a port is a trait the s
 1. `lib.rs` re-exports the model and defines `compile`, which hands the compilation to the service with the real adapters.
 2. The service, `use_cases/compile.rs`, asks the disk port for the snippet files the compilation names, and the naming policy for the snippets they make. It gathers every problem with the description before going on.
 3. The project policy makes the `Project` that compiles those snippets: one package per snippet, with the compilation's edition and dependencies.
-4. The disk port lists the names at the project's root, the ownership policy says whose that folder is, and the service refuses a folder holding files compile-outcomes did not write, and for a clean build a target folder Cargo did not make. Otherwise the disk port writes the project, the Cargo port cleans the build output for a clean build, and the Cargo port builds it and returns the `BuildReport`: every compiler message with the crate it is about, every crate built, and what Cargo wrote to its error output.
+4. The disk port lists the names at the project's root, the ownership policy says whose that folder is, and the service refuses a folder holding files compile-outcomes did not write, and for a clean build a target folder Cargo did not make. Otherwise, for a compilation with clippy, the Cargo port checks that clippy is installed; the disk port writes the project, the Cargo port cleans the build output for a clean build, and the Cargo port builds it, with `cargo build` or `cargo clippy`, and returns the `BuildReport`: every compiler message with the crate it is about, every crate built, and what Cargo wrote to its error output.
 5. The outcomes policy turns the report into the `Outcomes`, or into the errors that kept the compilation from them.
 
 ## Module roles
 
 Every module plays one role, and says which on the first line of its `//!` doc comment, such as `//! Policy: the outcome of every snippet, from what Cargo reported.` compile-outcomes' `lib.rs` is the exception: its documentation is the README, which docs.rs shows as the crate's front page, so it says its role in a plain `//` comment on its first line.
 
-1. **Entity**: data and the invariants it keeps, in `domain/`: the compilation, the snippets and their names, the project, the build report and the outcomes.
+1. **Entity**: data and the invariants it keeps, in `domain/`: the compilation and its clippy lint levels, the snippets and their names, the project, the build report and the outcomes.
 2. **Error**: what keeps a compilation from its outcomes, in `domain/errors.rs`, as "Errors" below describes.
 3. **Policy**: a pure decision, in `use_cases/`: naming the snippets, making the project, whose the project and target folders are, and the outcomes.
 4. **Service**: `use_cases/compile.rs`, which runs a compilation through the ports and the policies.
 5. **Port**: a trait the service needs the world to implement, in `ports.rs`: the disk and Cargo.
-6. **Adapter**: the code that does input and output, in `adapters/`: the disk adapter, which speaks `std::fs` and `toml`, and the Cargo adapter, which speaks `std::process` and `cargo_metadata`. Pure code that only one adapter uses to speak its library, such as turning a compiler message into a `Diagnostic`, is a private submodule of that adapter.
+6. **Adapter**: the code that does input and output, in `adapters/`: the disk adapter, which speaks `std::fs` and `toml`, and the Cargo adapter, which speaks `std::process` and `cargo_metadata`. Pure code that only one adapter uses to speak its library, such as turning a compiler message into a `Diagnostic` or clippy's lint levels into its flags, is a private submodule of that adapter.
 7. **Facade**: `lib.rs`, which re-exports the model and holds `compile`, a one-line call to the service.
 
 A submodule that serves a single module plays its parent's role and says so on its role line.
@@ -86,8 +86,8 @@ Layering goes one way. The facade calls the service with the adapters; the servi
 
 ## The public API
 
-- **Its names are a promise.** `compile`, `Compilation` and its methods, `Dependency`, `Edition`, `Outcomes`, `Outcome`, `Diagnostic`, `Location`, `SnippetName`, `Errors` and `Error` are what users write; changing how any of them is named or typed is agreed with the maintainer first.
-- **Room to grow.** `Diagnostic`, `Location`, `Edition` and `Error` are `#[non_exhaustive]`, and so is each variant of `Error` with fields, so a later version can add a field, an edition or an error without breaking a user's code.
+- **Its names are a promise.** `compile`, `Compilation` and its methods, `Clippy` and its methods, `Group`, `Dependency`, `Edition`, `Outcomes`, `Outcome`, `Diagnostic`, `Location`, `SnippetName`, `Errors` and `Error` are what users write; changing how any of them is named or typed is agreed with the maintainer first.
+- **Room to grow.** `Diagnostic`, `Location`, `Edition`, `Group` and `Error` are `#[non_exhaustive]`, and so is each variant of `Error` with fields, so a later version can add a field, an edition, a group of clippy's or an error without breaking a user's code.
 
 ## Comments
 

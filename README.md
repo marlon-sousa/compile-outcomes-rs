@@ -138,6 +138,7 @@ harness = false
 - `.dependency(Dependency::path(name, path))` or `.dependency(Dependency::version(name, "1.0"))` gives every snippet a dependency, with `.features([...])` and `.without_default_features()` when needed.
 - `.lockfile("Cargo.lock")` makes the dependencies resolve to the versions your own lockfile holds. It is copied, never written.
 - `.clean_build()` runs `cargo clean` on the build output first, so that every crate compiles again, dependencies included. It cleans only a target folder Cargo marked as its own with a `CACHEDIR.TAG` file.
+- `.clippy(Clippy::new())` compiles the snippets with `cargo clippy` instead of `cargo build`, so that clippy's lints come back as warnings, each with its lint as its code, such as `clippy::let_and_return`. `Clippy::new()` keeps clippy's own lint levels; `.warn(Group::Pedantic)`, `.allow(...)` and `.deny(...)` set those of a group, and `.warn_lint("unwrap_used")`, `.allow_lint(...)` and `.deny_lint(...)` those of one lint, in order, a later one overriding an earlier one. A denied lint makes its snippet fail. Clippy lints only the snippets, never their dependencies, and must be installed, with `rustup component add clippy`.
 
 A relative path is taken from the current folder, which for a test is its crate's folder.
 
@@ -172,9 +173,9 @@ compile-outcomes works the same on Linux, macOS and Windows, and its tests run o
 
 Compiler messages change from one Rust version to the next, and compile-outcomes reports them as they are. A diagnostic's `code`, such as `E0425`, and its `line` and `column` rarely change; its `message`, one line, sometimes does; and `rendered`, the whole block, changes most often. A suite that checks codes and locations, and messages only where they matter, survives most upgrades; one that compares `rendered` runs best on one pinned toolchain.
 
-### What 0.1.0 does not do yet
+### What 0.1 does not do yet
 
-Snippets compiled as binaries or tests, dependencies by git URL or for only some snippets, choosing the target, the profile or extra `rustc` flags, a time limit, diagnostics with their paths rewritten alike on every platform, and a `Display` for an outcome are not part of 0.1.0; each is planned in an [open issue labelled `feature`](https://github.com/marlon-sousa/compile-outcomes-rs/issues?q=is%3Aissue%20is%3Aopen%20label%3Afeature). [docs/SPEC.md](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/docs/SPEC.md) describes exactly what 0.1.0 does.
+Snippets compiled as binaries or tests, dependencies by git URL or for only some snippets, choosing the target, the profile or extra `rustc` flags, a time limit, diagnostics with their paths rewritten alike on every platform, and a `Display` for an outcome are not part of 0.1; each is planned in an [open issue labelled `feature`](https://github.com/marlon-sousa/compile-outcomes-rs/issues?q=is%3Aissue%20is%3Aopen%20label%3Afeature). [docs/SPEC.md](https://github.com/marlon-sousa/compile-outcomes-rs/blob/main/docs/SPEC.md) describes exactly what 0.1 does.
 
 The minimum supported Rust version is 1.85.
 

@@ -10,15 +10,15 @@ mod test_support;
 mod use_cases;
 
 pub use domain::{
-    Compilation, Dependency, Diagnostic, Edition, Error, Errors, Location, Outcome, Outcomes,
-    SnippetName,
+    Clippy, Compilation, Dependency, Diagnostic, Edition, Error, Errors, Group, Location, Outcome,
+    Outcomes, SnippetName,
 };
 
 use adapters::{CargoProcess, FileSystem};
 
 /// Compiles every snippet of `compilation` and returns the outcome of each, or the errors that kept it from them.
 ///
-/// It writes the project to `work_dir/project`, then runs `cargo build --workspace --keep-going --message-format=json --color=never` there, with `work_dir/target` as the target folder. A snippet that fails to compile is an outcome, never an error.
+/// It writes the project to `work_dir/project`, then runs `cargo build --workspace --keep-going --message-format=json --color=never` there, with `work_dir/target` as the target folder, or `cargo clippy` with the same arguments for a compilation given [`Compilation::clippy`]. A snippet that fails to compile is an outcome, never an error.
 ///
 /// It runs the `cargo` the `CARGO` environment variable names, which Cargo sets for the tests it runs, otherwise the one on the `PATH`.
 ///

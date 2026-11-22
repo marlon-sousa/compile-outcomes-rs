@@ -2,7 +2,8 @@
 
 use std::fs;
 
-use compile_outcomes::{Compilation, Dependency, Edition};
+use compile_outcomes::{Clippy, Compilation, Dependency, Edition, Group};
+use cucumber::gherkin::Step;
 use cucumber::given;
 
 use super::{Compiling, fixture, work_dir};
@@ -78,4 +79,51 @@ fn a_dependency_of_version(world: &mut Compiling, name: String, version: String)
 #[given(expr = "the lockfile {string}")]
 fn the_lockfile(world: &mut Compiling, path: String) {
     world.describe(|compilation| compilation.lockfile(fixture(&path)));
+}
+
+#[given("clippy")]
+fn clippy(world: &mut Compiling) {
+    world.describe(|compilation| compilation.clippy(Clippy::new()));
+}
+
+/// Each row is a level, `allow`, `warn` or `deny`, whether it is for a `group` or a `lint`, and its name.
+#[given("clippy with the levels:")]
+fn clippy_with_levels(world: &mut Compiling, step: &Step) {
+    let table = step.table.as_ref().expect("the step has a table");
+    let clippy = table.rows.iter().fold(Clippy::new(), with_level);
+    world.describe(|compilation| compilation.clippy(clippy));
+}
+
+fn with_level(clippy: Clippy, row: &Vec<String>) -> Clippy {
+    match row.as_slice() {
+        [level, kind, name] if kind == "group" => match level.as_str() {
+            "allow" => clippy.allow(group(name)),
+            "warn" => clippy.warn(group(name)),
+            "deny" => clippy.deny(group(name)),
+            other => panic!("no level {other}"),
+        },
+        [level, kind, name] if kind == "lint" => match level.as_str() {
+            "allow" => clippy.allow_lint(name),
+            "warn" => clippy.warn_lint(name),
+            "deny" => clippy.deny_lint(name),
+            other => panic!("no level {other}"),
+        },
+        other => panic!("not a level: {other:?}"),
+    }
+}
+
+fn group(name: &str) -> Group {
+    match name {
+        "all" => Group::All,
+        "correctness" => Group::Correctness,
+        "suspicious" => Group::Suspicious,
+        "style" => Group::Style,
+        "complexity" => Group::Complexity,
+        "perf" => Group::Perf,
+        "pedantic" => Group::Pedantic,
+        "restriction" => Group::Restriction,
+        "nursery" => Group::Nursery,
+        "cargo" => Group::Cargo,
+        other => panic!("no group {other}"),
+    }
 }
