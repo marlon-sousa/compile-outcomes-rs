@@ -1,3 +1,4 @@
+mod clippy;
 mod fakes;
 mod ownership;
 

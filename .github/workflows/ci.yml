@@ -85,7 +85,7 @@ jobs:
           msrv=$(cargo metadata --no-deps --format-version 1 \
             | jq -r '.packages[] | select(.name == "compile-outcomes") | .rust_version // empty')
           test -n "$msrv"
-          rustup toolchain install "$msrv" --profile minimal
+          rustup toolchain install "$msrv" --profile minimal --component clippy
           echo "RUSTUP_TOOLCHAIN=$msrv" >> "$GITHUB_ENV"
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - run: cargo xtask test

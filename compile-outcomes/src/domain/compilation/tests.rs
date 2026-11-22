@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
-use super::{Build, Compilation, SnippetSource};
-use crate::domain::{Dependency, Edition};
+use super::{Build, Compilation, SnippetSource, Tool};
+use crate::domain::{Clippy, Dependency, Edition, Group};
 
 #[test]
 fn a_new_compilation_has_nothing_but_its_edition_and_folder() {
@@ -13,6 +13,7 @@ fn a_new_compilation_has_nothing_but_its_edition_and_folder() {
     assert!(compilation.dependencies().is_empty());
     assert_eq!(compilation.lockfile_path(), &None);
     assert_eq!(compilation.build(), Build::Reusing);
+    assert_eq!(*compilation.tool(), Tool::Build);
 }
 
 #[test]
@@ -50,5 +51,17 @@ fn dependencies_and_the_lockfile_are_kept() {
     assert_eq!(
         compilation.lockfile_path().as_deref(),
         Some(Path::new("Cargo.lock"))
+    );
+}
+
+#[test]
+fn clippy_given_again_replaces_the_earlier_one() {
+    let compilation = Compilation::new(Edition::E2021, "work")
+        .clippy(Clippy::new().deny(Group::All))
+        .clippy(Clippy::new().warn(Group::Pedantic));
+
+    assert_eq!(
+        *compilation.tool(),
+        Tool::Clippy(Clippy::new().warn(Group::Pedantic))
     );
 }

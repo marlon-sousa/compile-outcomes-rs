@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use super::compilation;
 use super::fakes::{FakeCargo, FakeDisk, Step};
-use crate::domain::Error;
+use crate::domain::{Error, Tool};
 use crate::use_cases::compile::compile;
 
 /// The names of a disk on which `folder` holds only the file `name`.
@@ -75,7 +75,10 @@ fn a_clean_build_has_cargo_clean_the_build_output_it_made_before_building() {
     let outcomes = compile(&compilation().clean_build(), &disk, &cargo);
 
     assert!(outcomes.is_ok());
-    assert_eq!(*cargo.steps.borrow(), [Step::Clean, Step::Build]);
+    assert_eq!(
+        *cargo.steps.borrow(),
+        [Step::Clean, Step::Build(Tool::Build)]
+    );
 }
 
 #[test]
@@ -85,7 +88,7 @@ fn a_build_that_is_not_clean_keeps_the_build_output() {
     let outcomes = compile(&compilation(), &FakeDisk::default(), &cargo);
 
     assert!(outcomes.is_ok());
-    assert_eq!(*cargo.steps.borrow(), [Step::Build]);
+    assert_eq!(*cargo.steps.borrow(), [Step::Build(Tool::Build)]);
 }
 
 #[test]

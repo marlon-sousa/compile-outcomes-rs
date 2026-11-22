@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-use crate::domain::{BuildReport, Error, Project};
+use crate::domain::{BuildReport, Error, Project, Tool};
 use crate::ports::{Cargo, Disk};
 
 /// A disk whose files, folders and names are given, and which records each project it writes.
@@ -55,24 +55,37 @@ impl Disk for FakeDisk {
     }
 }
 
-/// Cargo that reports the given crates built, or cannot be started, or cannot clean, and records each project it builds and each step it takes.
+/// Cargo that reports the given crates built, or cannot be started, or has no clippy, or cannot clean, and records each project it builds and each step it takes.
 #[derive(Default)]
 pub(super) struct FakeCargo {
     pub(super) built: Vec<String>,
     pub(super) missing: bool,
+    pub(super) without_clippy: bool,
     pub(super) refuses_cleaning: bool,
     pub(super) builds: RefCell<Vec<Project>>,
     pub(super) steps: RefCell<Vec<Step>>,
 }
 
 /// What the service asked Cargo to do.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) enum Step {
+    CheckClippy,
     Clean,
-    Build,
+    Build(Tool),
 }
 
 impl Cargo for FakeCargo {
+    fn clippy_installed(&self) -> Result<(), Error> {
+        self.steps.borrow_mut().push(Step::CheckClippy);
+        if self.without_clippy {
+            return Err(Error::ClippyNotInstalled {
+                program: PathBuf::from("cargo"),
+                output: "no such command: `clippy`".to_owned(),
+            });
+        }
+        Ok(())
+    }
+
     fn clean(&self, project: &Project) -> Result<(), Error> {
         self.steps.borrow_mut().push(Step::Clean);
         if self.refuses_cleaning {
@@ -84,8 +97,8 @@ impl Cargo for FakeCargo {
         Ok(())
     }
 
-    fn build(&self, project: &Project) -> Result<BuildReport, Error> {
-        self.steps.borrow_mut().push(Step::Build);
+    fn build(&self, project: &Project, tool: &Tool) -> Result<BuildReport, Error> {
+        self.steps.borrow_mut().push(Step::Build(tool.clone()));
         self.builds.borrow_mut().push(project.clone());
         if self.missing {
             return Err(Error::CargoNotStarted {
